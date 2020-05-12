@@ -2,11 +2,21 @@
 #include "CDirect3D.h"
 #include <DirectXPackedVector.h>
 //#include <GeometricPrimitive.h>
-
+#include "DirectXTex/DirectXTex.h"
 #include <d3dcompiler.h>
+
+
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib,"D3DCompiler.lib")
+
+using namespace DirectX;
+D3D11_INPUT_ELEMENT_DESC ied[] =
+{
+	{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+	//{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+};
 
 CDirect3D::CDirect3D()
 {
@@ -18,14 +28,46 @@ CDirect3D::CDirect3D()
 	OurVertices[3] = {0.5f, -0.5f, 0.5f, {0.0f, 1.0f, 0.0f, 1.0f }};
 	*/
 	 rot = 0.0f;
-	OurVertices[0] = {-1.0f, -1.0f, -1.0f, {1.0f, 0.0f, 0.0f, 1.0f}};
-	OurVertices[1] = {-1.0f, +1.0f, -1.0f,{ 0.0f, 1.0f, 0.0f, 1.0f}};
-	OurVertices[2] = {+1.0f, +1.0f, -1.0f,{ 0.0f, 0.0f, 1.0f, 1.0f}};
-	OurVertices[3] = {+1.0f, -1.0f, -1.0f, { 1.0f, 1.0f, 0.0f, 1.0f}};
-	OurVertices[4] = {-1.0f, -1.0f, +1.0f, { 0.0f, 1.0f, 1.0f, 1.0f}};
-	OurVertices[5] = {-1.0f, +1.0f, +1.0f, { 1.0f, 1.0f, 1.0f, 1.0f}};
-	OurVertices[6] = {+1.0f, +1.0f, +1.0f, { 1.0f, 0.0f, 1.0f, 1.0f}};
-	OurVertices[7] = {+1.0f, -1.0f, +1.0f, { 1.0f, 0.0f, 0.0f, 1.0f}};
+	
+
+	// Front Face
+	int i = 0;
+	OurVertices[i++]=	VERTEX(-1.0f, -1.0f, -1.0f, 0.0f, 1.0f);
+	OurVertices[i++] = VERTEX(-1.0f, 1.0f, -1.0f, 0.0f, 0.0f);
+	OurVertices[i++] = VERTEX(1.0f, 1.0f, -1.0f, 1.0f, 0.0f);
+	OurVertices[i++] = VERTEX(1.0f, -1.0f, -1.0f, 1.0f, 1.0f);
+
+		// Back Face
+	OurVertices[i++] = VERTEX(-1.0f, -1.0f, 1.0f, 1.0f, 1.0f);
+	OurVertices[i++] = VERTEX(1.0f, -1.0f, 1.0f, 0.0f, 1.0f);
+	OurVertices[i++] = VERTEX(1.0f, 1.0f, 1.0f, 0.0f, 0.0f);
+	OurVertices[i++] = VERTEX(-1.0f, 1.0f, 1.0f, 1.0f, 0.0f);
+
+		// Top Face
+	OurVertices[i++]= VERTEX(-1.0f, 1.0f, -1.0f, 0.0f, 1.0f);
+	OurVertices[i++] = VERTEX(-1.0f, 1.0f, 1.0f, 0.0f, 0.0f);
+	OurVertices[i++] = VERTEX(1.0f, 1.0f, 1.0f, 1.0f, 0.0f);
+	OurVertices[i++] = VERTEX(1.0f, 1.0f, -1.0f, 1.0f, 1.0f);
+
+		// Bottom Face
+	OurVertices[i++] = VERTEX(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f);
+	OurVertices[i++] = VERTEX(1.0f, -1.0f, -1.0f, 0.0f, 1.0f);
+	OurVertices[i++] = VERTEX(1.0f, -1.0f, 1.0f, 0.0f, 0.0f);
+	OurVertices[i++] = VERTEX(-1.0f, -1.0f, 1.0f, 1.0f, 0.0f);
+
+		// Left Face
+	OurVertices[i++] = VERTEX(-1.0f, -1.0f, 1.0f, 0.0f, 1.0f);
+	OurVertices[i++] = VERTEX(-1.0f, 1.0f, 1.0f, 0.0f, 0.0f);
+	OurVertices[i++] = VERTEX(-1.0f, 1.0f, -1.0f, 1.0f, 0.0f);
+	OurVertices[i++] = VERTEX(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f);
+
+		// Right Face
+	OurVertices[i++] = VERTEX(1.0f, -1.0f, -1.0f, 0.0f, 1.0f);
+	OurVertices[i++] = VERTEX(1.0f, 1.0f, -1.0f, 0.0f, 0.0f);
+	OurVertices[i++] = VERTEX(1.0f, 1.0f, 1.0f, 1.0f, 0.0f);
+	OurVertices[i++] = VERTEX(1.0f, -1.0f, 1.0f, 1.0f, 1.0f);
+
+
 
 	camPosition = XMVectorSet(0.0f, 3.0f, -5.0f, 0.0f);
 	m_camTargetX = 0.0f;
@@ -47,29 +89,29 @@ void CDirect3D::InitGraphics()
 	// create a triangle using the VERTEX struct
 
 	UINT indexBuf[] = {
-		// front face
- 0, 1, 2,
- 0, 2, 3,
+		// Front Face
+				0,  1,  2,
+				0,  2,  3,
 
- // back face
- 4, 6, 5,
- 4, 7, 6,
+				// Back Face
+				4,  5,  6,
+				4,  6,  7,
 
- // left face
- 4, 5, 1,
- 4, 1, 0,
+				// Top Face
+				8,  9, 10,
+				8, 10, 11,
 
- // right face
- 3, 2, 6,
- 3, 6, 7,
+				// Bottom Face
+				12, 13, 14,
+				12, 14, 15,
 
- // top face
- 1, 5, 6,
- 1, 6, 2,
+				// Left Face
+				16, 17, 18,
+				16, 18, 19,
 
- // bottom face
- 4, 0, 3,
- 4, 3, 7
+				// Right Face
+				20, 21, 22,
+				20, 22, 23
 	};
 	
 
@@ -77,7 +119,7 @@ void CDirect3D::InitGraphics()
 	ZeroMemory(&bd, sizeof(bd));
 
 	bd.Usage = D3D11_USAGE_DYNAMIC;                // write access access by CPU and GPU
-	bd.ByteWidth = sizeof(VERTEX) * 8;             // size is the VERTEX struct * 3
+	bd.ByteWidth = sizeof(VERTEX) * 24;             // size is the VERTEX struct * 3
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;       // use as a vertex buffer
 	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;    // allow CPU to write in buffer
 
@@ -132,12 +174,6 @@ void CDirect3D::InitPipeline()
 	m_pDevCtx->VSSetShader(m_pVS, 0, 0);
 	m_pDevCtx->PSSetShader(m_pPS, 0, 0);
 
-	// create the input layout object
-	D3D11_INPUT_ELEMENT_DESC ied[] =
-	{
-		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
-	};
 
 
 	m_dev->CreateInputLayout(ied, 2, VS->GetBufferPointer(), VS->GetBufferSize(), &m_pLayout);
@@ -220,9 +256,14 @@ void CDirect3D::RanderFrame(void)
 	m_pDevCtx->Unmap(m_pCBPerBuffer, NULL);                                      // unmap the buffer
 	m_pDevCtx->VSSetConstantBuffers(0, 1, &m_pCBPerBuffer);
 
+
+	m_pDevCtx->PSSetShaderResources(0, 1, &m_CubesTexture);
+	m_pDevCtx->PSSetSamplers(0, 1, &m_CubesTexSamplerState);
+
+
 	m_pDevCtx->DrawIndexed(36,0,0);
 
-
+	
 	m_worldMatrix = XMMatrixIdentity();
 
 	//Define cube1's world space matrix
@@ -246,13 +287,49 @@ void CDirect3D::RanderFrame(void)
 	m_pDevCtx->VSSetConstantBuffers(0, 1, &m_pCBPerBuffer);
 
 	m_pDevCtx->DrawIndexed(36, 0, 0);
-
+	
 
 
 	m_swapChain->Present(0, 0);
 	
 }
 
+HRESULT CDirect3D::LoadTexture(CString strTextureFilePath)
+{
+	ScratchImage image;
+
+	HRESULT hr = 0;
+	hr = CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
+	if (FAILED(hr))
+	{
+		AfxMessageBox(_T("Error CoInitializeEx\r\n") + strTextureFilePath);
+		goto EXIT;
+	}
+
+	hr= LoadFromWICFile(strTextureFilePath.GetBuffer(), WIC_FLAGS_NONE, nullptr, image);
+	
+	if (FAILED(hr))
+	{
+		CString str;
+		str.Format(_T("%x\r\n"), hr);
+		AfxMessageBox(_T("Error LoadFromWICFile\r\n ")+str + strTextureFilePath);
+		goto EXIT;
+
+		
+	}
+
+	hr = CreateShaderResourceView(m_dev, image.GetImages(), image.GetImageCount(), image.GetMetadata(), &m_CubesTexture);
+
+	if (FAILED(hr))
+	{
+		AfxMessageBox(_T("Error CreateShaderResourceView\r\n") + strTextureFilePath);
+		goto EXIT;
+	}
+
+EXIT:
+
+	return hr;
+}
 BOOL CDirect3D::initD3D(HWND hWnd)
 {
 	DXGI_SWAP_CHAIN_DESC scd;
@@ -338,7 +415,28 @@ BOOL CDirect3D::initD3D(HWND hWnd)
 
 	
 
-	
+	if (FAILED(LoadTexture(_T("1.jpg"))))
+	{
+		CleanD3D();
+		return FALSE;
+	}
+
+	D3D11_SAMPLER_DESC sampDesc;
+	ZeroMemory(&sampDesc, sizeof(sampDesc));
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampDesc.MinLOD = 0;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	hr = m_dev->CreateSamplerState(&sampDesc, &m_CubesTexSamplerState);
+	if (FAILED(hr))
+	{
+
+		CleanD3D();
+		return FALSE;
+	}
 
 	InitPipeline();
 	InitGraphics();

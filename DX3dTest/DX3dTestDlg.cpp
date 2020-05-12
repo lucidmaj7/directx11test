@@ -83,7 +83,7 @@ UINT Thread(LPVOID lpParam)
 		if (up)
 		{
 		
-			pDlg->m_Direct3D.OurVertices[0].Color[i % 3] += 0.05f;
+			//pDlg->m_Direct3D.OurVertices[0].Color[i % 3] += 0.05f;
 			pDlg->m_Direct3D.color[i % 3] += 0.05f;
 			if (pDlg->m_Direct3D.color[i % 3] > 1.0f)
 			{
@@ -94,7 +94,7 @@ UINT Thread(LPVOID lpParam)
 		else 
 		{
 		
-			pDlg->m_Direct3D.OurVertices[0].Color[i % 3] -= 0.05f;
+		//	pDlg->m_Direct3D.OurVertices[0].Color[i % 3] -= 0.05f;
 			pDlg->m_Direct3D.color[i%3] -= 0.05f;
 			if (pDlg->m_Direct3D.color[i % 3] < 0.0f)
 			{
@@ -106,7 +106,7 @@ UINT Thread(LPVOID lpParam)
 
 		pDlg->m_Direct3D.RanderFrame();
 		
-		Sleep(1000 / 30);
+		Sleep(1000 / 60);
 
 	}
 

@@ -6,10 +6,22 @@
 using namespace DirectX;
 
 struct VERTEX { 
-	float X, Y, Z; 	
-	float Color[4];
-};    // a struct to define a vertex
+	VERTEX() {};
+	VERTEX(float x, float y, float z, float u, float v)
+	{
+		X = x;
+		Y = y;
+		Z = z;
+		texCoord.x = u;
+		texCoord.y = v;
+	}
 
+	float X, Y, Z; 	
+//	float Color[4];
+
+	XMFLOAT2 texCoord;
+};    // a struct to define a vertex
+	// create the input layout object
 
 struct cbPerObject
 {
@@ -20,7 +32,7 @@ struct cbPerObject
 class CDirect3D
 {
 public:
-	VERTEX OurVertices[8];
+	VERTEX OurVertices[24];
 	CDirect3D();
 	~CDirect3D();
 	float rot;
@@ -35,6 +47,9 @@ public:
 	float m_camTargetX; float m_camTargetY; float m_camTargetZ;
 	void CDirect3D::CamMove(float x, float y, float z);
 private:
+	HRESULT LoadTexture(CString strTextureFilePath);
+	ID3D11ShaderResourceView* m_CubesTexture;
+	ID3D11SamplerState* m_CubesTexSamplerState;
 	ID3D11DepthStencilState* m_depthStencilState;
 	ID3D11DepthStencilView* depthStencilView;
 	ID3D11Texture2D* depthStencilBuffer;
