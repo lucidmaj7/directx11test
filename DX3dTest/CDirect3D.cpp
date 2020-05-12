@@ -32,10 +32,10 @@ CDirect3D::CDirect3D()
 
 	// Front Face
 	int i = 0;
-	OurVertices[i++]=	VERTEX(-1.0f, -1.0f, -1.0f, 0.0f, 1.0f);
+	OurVertices[i++]=	VERTEX(-1.0f, -1.0f, -1.0f, 0.0f, 2.0f);
 	OurVertices[i++] = VERTEX(-1.0f, 1.0f, -1.0f, 0.0f, 0.0f);
-	OurVertices[i++] = VERTEX(1.0f, 1.0f, -1.0f, 1.0f, 0.0f);
-	OurVertices[i++] = VERTEX(1.0f, -1.0f, -1.0f, 1.0f, 1.0f);
+	OurVertices[i++] = VERTEX(1.0f, 1.0f, -1.0f, 2.0f, 0.0f);
+	OurVertices[i++] = VERTEX(1.0f, -1.0f, -1.0f, 2.0f, 2.0f);
 
 		// Back Face
 	OurVertices[i++] = VERTEX(-1.0f, -1.0f, 1.0f, 1.0f, 1.0f);
@@ -222,9 +222,13 @@ void CDirect3D::RanderFrame(void)
 	m_pDevCtx->IASetVertexBuffers(0, 1, &m_pVBuffer, &stride, &offset);
 	m_pDevCtx->IASetIndexBuffer(m_pIdxBuffer, DXGI_FORMAT_R32_UINT, 0);
 	m_pDevCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+
+
 	m_pDevCtx->ClearRenderTargetView(m_pRenderTargetView, color);
 
-
+	//Refresh the Depth/Stencil view
+	m_pDevCtx->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	//Camera information
 	
@@ -237,7 +241,7 @@ void CDirect3D::RanderFrame(void)
 	m_worldMatrix = XMMatrixIdentity();
 
 	//Define cube1's world space matrix
-	XMVECTOR rotaxis = XMVectorSet(1.0f, 1.0f, 0.0f, 0.0f);
+	XMVECTOR rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	XMMATRIX Rotation = XMMatrixRotationAxis(rotaxis, rot);
 	XMMATRIX Translation = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 
@@ -267,12 +271,11 @@ void CDirect3D::RanderFrame(void)
 	m_worldMatrix = XMMatrixIdentity();
 
 	//Define cube1's world space matrix
-	 rotaxis = XMVectorSet(0.0f, 1.0f, 0.5f, 0.0f);
+	 rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	 XMMATRIX Rotation2 = XMMatrixRotationAxis( XMVectorSet(0.0f, 0.0, 1.0f, 0.0f),rot);
 	 Rotation = XMMatrixRotationAxis(rotaxis, rot);
-	 Translation = XMMatrixTranslation(3.0f, 0.0f, 0.0f);
-
-	//Set cube1's world space using the transformations
-	m_worldMatrix = Translation * Rotation;
+	 Translation = XMMatrixTranslation(0.0f, 0.0f, 3.0f);
+	 m_worldMatrix = XMMatrixScaling(0.8f, 0.8f, 0.8f)* Translation * Rotation ;
 
 
 	WVP = m_worldMatrix * m_camMatrix * m_projectionMatrix;
@@ -343,7 +346,7 @@ BOOL CDirect3D::initD3D(HWND hWnd)
 	scd.BufferDesc.Height = 600;                 // set the back buffer height
 	scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;     // how swap chain is to be used
 	scd.OutputWindow = hWnd;                               // the window to be used
-	scd.SampleDesc.Count = 4;                              // how many multisamples
+	scd.SampleDesc.Count = 1;                              // how many multisamples
 	scd.Windowed = TRUE;                                   // windowed/full-screen mode
 	scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;    // allow full-screen switching
 
@@ -369,6 +372,9 @@ BOOL CDirect3D::initD3D(HWND hWnd)
 		return FALSE;
 	}
 
+	
+
+
 	ID3D11Texture2D* pBackBuffer;
 	m_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
 
@@ -376,7 +382,23 @@ BOOL CDirect3D::initD3D(HWND hWnd)
 	pBackBuffer->Release();
 	///////////////**************new**************////////////////////
 
-	m_pDevCtx->OMSetRenderTargets(1, &m_pRenderTargetView, NULL);
+	//Describe our Depth/Stencil Buffer
+	D3D11_TEXTURE2D_DESC depthStencilDesc;
+	depthStencilDesc.Width = 800;
+	depthStencilDesc.Height = 600;
+	depthStencilDesc.MipLevels = 1;
+	depthStencilDesc.ArraySize = 1;
+	depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilDesc.SampleDesc.Count = 1;
+	depthStencilDesc.SampleDesc.Quality = 0;
+	depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthStencilDesc.CPUAccessFlags = 0;
+	depthStencilDesc.MiscFlags = 0;
+	m_dev->CreateTexture2D(&depthStencilDesc, NULL, &depthStencilBuffer);
+	m_dev->CreateDepthStencilView(depthStencilBuffer, NULL, &depthStencilView);
+
+	m_pDevCtx->OMSetRenderTargets(1, &m_pRenderTargetView, depthStencilView);
 	
 
 	// Set the viewport
@@ -474,6 +496,8 @@ void CDirect3D::CleanD3D()
 		m_swapChain->Release();
 		m_swapChain = NULL;
 	}
+	depthStencilView->Release();
+	depthStencilBuffer->Release();
 	if (m_pRenderTargetView)
 	{
 		m_pRenderTargetView->Release();
