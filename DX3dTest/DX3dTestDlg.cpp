@@ -68,6 +68,7 @@ BEGIN_MESSAGE_MAP(CDX3dTestDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_WM_DESTROY()
 	ON_WM_KEYDOWN()
+	ON_WM_ENTERIDLE()
 END_MESSAGE_MAP()
 
 
@@ -105,7 +106,7 @@ UINT Thread(LPVOID lpParam)
 		
 
 		pDlg->m_Direct3D.RanderFrame();
-		
+		//
 		Sleep(1000 / 60);
 
 	}
@@ -201,6 +202,7 @@ void CDX3dTestDlg::OnPaint()
 		CDialogEx::OnPaint();
 	}
 	//m_Direct3D.RanderFrame();
+
 }
 
 // The system calls this function to obtain the cursor to display while the user drags
@@ -256,4 +258,12 @@ BOOL CDX3dTestDlg::PreTranslateMessage(MSG* pMsg)
 	
 
 	return CDialogEx::PreTranslateMessage(pMsg);
+}
+
+
+void CDX3dTestDlg::OnEnterIdle(UINT nWhy, CWnd* pWho)
+{
+	CDialogEx::OnEnterIdle(nWhy, pWho);
+
+	// TODO: Add your message handler code here
 }

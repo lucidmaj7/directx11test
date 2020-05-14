@@ -36,4 +36,5 @@ public:
 	afx_msg void OnDestroy();
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	afx_msg void OnEnterIdle(UINT nWhy, CWnd* pWho);
 };

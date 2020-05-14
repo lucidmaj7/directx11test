@@ -13,9 +13,11 @@
 using namespace DirectX;
 D3D11_INPUT_ELEMENT_DESC ied[] =
 {
-	{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-	//{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+
+
+	   { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "NORMAL",     0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0}
 };
 
 CDirect3D::CDirect3D()
@@ -27,45 +29,50 @@ CDirect3D::CDirect3D()
 	OurVertices[2] = { 0.5f,  0.5f, 0.5f, {  0.0f, 0.0f, 1.0f, 1.0f }};
 	OurVertices[3] = {0.5f, -0.5f, 0.5f, {0.0f, 1.0f, 0.0f, 1.0f }};
 	*/
+
+	 m_light.dir = XMFLOAT3(0.25f, 0.5f, -1.0f);
+	 m_light.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	 m_light.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	 rot = 0.0f;
 	
 
 	// Front Face
 	int i = 0;
-	OurVertices[i++]=	VERTEX(-1.0f, -1.0f, -1.0f, 0.0f, 2.0f);
-	OurVertices[i++] = VERTEX(-1.0f, 1.0f, -1.0f, 0.0f, 0.0f);
-	OurVertices[i++] = VERTEX(1.0f, 1.0f, -1.0f, 2.0f, 0.0f);
-	OurVertices[i++] = VERTEX(1.0f, -1.0f, -1.0f, 2.0f, 2.0f);
+	// Front Face
+	OurVertices[i++] = VERTEX(-1.0f, -1.0f, -1.0f, 0.0f, 1.0f, -1.0f, -1.0f, -1.0f);
+	OurVertices[i++] = VERTEX(-1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, -1.0f);
+	OurVertices[i++] = VERTEX(1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f);
+	OurVertices[i++] = VERTEX(1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f);
 
-		// Back Face
-	OurVertices[i++] = VERTEX(-1.0f, -1.0f, 1.0f, 1.0f, 1.0f);
-	OurVertices[i++] = VERTEX(1.0f, -1.0f, 1.0f, 0.0f, 1.0f);
-	OurVertices[i++] = VERTEX(1.0f, 1.0f, 1.0f, 0.0f, 0.0f);
-	OurVertices[i++] = VERTEX(-1.0f, 1.0f, 1.0f, 1.0f, 0.0f);
+	// Back Face
+	OurVertices[i++] = VERTEX(-1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f);
+	OurVertices[i++] = VERTEX(1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 1.0f);
+	OurVertices[i++] = VERTEX(1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+	OurVertices[i++] = VERTEX(-1.0f, 1.0f, 1.0f, 1.0f, 0.0f, -1.0f, 1.0f, 1.0f);
 
-		// Top Face
-	OurVertices[i++]= VERTEX(-1.0f, 1.0f, -1.0f, 0.0f, 1.0f);
-	OurVertices[i++] = VERTEX(-1.0f, 1.0f, 1.0f, 0.0f, 0.0f);
-	OurVertices[i++] = VERTEX(1.0f, 1.0f, 1.0f, 1.0f, 0.0f);
-	OurVertices[i++] = VERTEX(1.0f, 1.0f, -1.0f, 1.0f, 1.0f);
+	// Top Face
+	OurVertices[i++] = VERTEX(-1.0f, 1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 1.0f, -1.0f);
+	OurVertices[i++] = VERTEX(-1.0f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f);
+	OurVertices[i++] = VERTEX(1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+	OurVertices[i++] = VERTEX(1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f);
 
-		// Bottom Face
-	OurVertices[i++] = VERTEX(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f);
-	OurVertices[i++] = VERTEX(1.0f, -1.0f, -1.0f, 0.0f, 1.0f);
-	OurVertices[i++] = VERTEX(1.0f, -1.0f, 1.0f, 0.0f, 0.0f);
-	OurVertices[i++] = VERTEX(-1.0f, -1.0f, 1.0f, 1.0f, 0.0f);
+	// Bottom Face
+	OurVertices[i++] = VERTEX(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, -1.0f);
+	OurVertices[i++] = VERTEX(1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, -1.0f, -1.0f);
+	OurVertices[i++] = VERTEX(1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, -1.0f, 1.0f);
+	OurVertices[i++] = VERTEX(-1.0f, -1.0f, 1.0f, 1.0f, 0.0f, -1.0f, -1.0f, 1.0f);
 
-		// Left Face
-	OurVertices[i++] = VERTEX(-1.0f, -1.0f, 1.0f, 0.0f, 1.0f);
-	OurVertices[i++] = VERTEX(-1.0f, 1.0f, 1.0f, 0.0f, 0.0f);
-	OurVertices[i++] = VERTEX(-1.0f, 1.0f, -1.0f, 1.0f, 0.0f);
-	OurVertices[i++] = VERTEX(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f);
+	// Left Face
+	OurVertices[i++] = VERTEX(-1.0f, -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 1.0f);
+	OurVertices[i++] = VERTEX(-1.0f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f);
+	OurVertices[i++] = VERTEX(-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 1.0f, -1.0f);
+	OurVertices[i++] = VERTEX(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, -1.0f);
 
-		// Right Face
-	OurVertices[i++] = VERTEX(1.0f, -1.0f, -1.0f, 0.0f, 1.0f);
-	OurVertices[i++] = VERTEX(1.0f, 1.0f, -1.0f, 0.0f, 0.0f);
-	OurVertices[i++] = VERTEX(1.0f, 1.0f, 1.0f, 1.0f, 0.0f);
-	OurVertices[i++] = VERTEX(1.0f, -1.0f, 1.0f, 1.0f, 1.0f);
+	// Right Face
+	OurVertices[i++] = VERTEX(1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, -1.0f, -1.0f);
+	OurVertices[i++] = VERTEX(1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, -1.0f);
+	OurVertices[i++] = VERTEX(1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+	OurVertices[i++] = VERTEX(1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 1.0f);
 
 
 
@@ -160,23 +167,24 @@ void CDirect3D::InitGraphics()
 void CDirect3D::InitPipeline()
 { 
 	ID3DBlob* VS = NULL, * PS = NULL;
+	ID3D10Blob* D2D_PS_Buffer = NULL;
 
-
+	
+	HRESULT hr=	D3DCompileFromFile(L"shaders.shader", 0, 0, "PShader", "ps_4_0", 0, 0, &PS, 0);
 	if (FAILED(D3DCompileFromFile(L"shaders.shader", 0, 0, "VShader", "vs_4_0", 0, 0, &VS, 0)))
 	{
-		OutputDebugString(_T("error"));
+		AfxMessageBox(_T("error"));
 	}
-	D3DCompileFromFile(L"shaders.shader", 0, 0, "PShader", "ps_4_0", 0, 0, &PS, 0);
-
+	 D3DCompileFromFile(L"shaders.shader", 0, 0, "D2D_PS", "ps_4_0", 0,  0, &D2D_PS_Buffer, 0);
 	m_dev->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), NULL, &m_pVS);
 	m_dev->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), NULL, &m_pPS);
-
+	m_dev->CreatePixelShader(D2D_PS_Buffer->GetBufferPointer(), D2D_PS_Buffer->GetBufferSize(), NULL, &D2D_PS);
 	m_pDevCtx->VSSetShader(m_pVS, 0, 0);
 	m_pDevCtx->PSSetShader(m_pPS, 0, 0);
 
 
 
-	m_dev->CreateInputLayout(ied, 2, VS->GetBufferPointer(), VS->GetBufferSize(), &m_pLayout);
+	m_dev->CreateInputLayout(ied, 3, VS->GetBufferPointer(), VS->GetBufferSize(), &m_pLayout);
 	m_pDevCtx->IASetInputLayout(m_pLayout);
 
 
@@ -198,7 +206,7 @@ void CDirect3D::RanderFrame(void)
 	
 	if (!m_pDevCtx)
 		return;
-	float color[4] = { 0.0f, 0.2f, 0.0f, 1.0f };
+	float color[4] = { 0.0f, 0.0f, 0.0f,0.0f };
 	
 	rot += .030f;
 	if (rot > 6.28f)
@@ -229,7 +237,9 @@ void CDirect3D::RanderFrame(void)
 
 	//Refresh the Depth/Stencil view
 	m_pDevCtx->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
+	m_constbuffPerFrame.light = m_light;
+	m_pDevCtx->UpdateSubresource(m_cbPerFrameBuffer, 0, NULL, &m_constbuffPerFrame, 0, 0);
+	m_pDevCtx->PSSetConstantBuffers(0, 1, &m_cbPerFrameBuffer);
 	//Camera information
 	
 
@@ -251,6 +261,8 @@ void CDirect3D::RanderFrame(void)
 	XMMATRIX WVP;
 	WVP = m_worldMatrix *m_camMatrix* m_projectionMatrix;
 	cbPerObj.WVP = XMMatrixTranspose(WVP);
+	cbPerObj.World = XMMatrixTranspose(m_worldMatrix);
+
 	//m_pDevCtx->UpdateSubresource(m_pCBPerBuffer, 0, NULL, &cbPerObj, 0, 0);
 	
 	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
@@ -271,7 +283,7 @@ void CDirect3D::RanderFrame(void)
 	m_worldMatrix = XMMatrixIdentity();
 
 	//Define cube1's world space matrix
-	 rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	 rotaxis = XMVectorSet(0.0f, 1.0f, 0.3f, 0.0f);
 	 XMMATRIX Rotation2 = XMMatrixRotationAxis( XMVectorSet(0.0f, 0.0, 1.0f, 0.0f),rot);
 	 Rotation = XMMatrixRotationAxis(rotaxis, rot);
 	 Translation = XMMatrixTranslation(0.0f, 0.0f, 3.0f);
@@ -280,6 +292,7 @@ void CDirect3D::RanderFrame(void)
 
 	WVP = m_worldMatrix * m_camMatrix * m_projectionMatrix;
 	cbPerObj.WVP = XMMatrixTranspose(WVP);
+	cbPerObj.World = XMMatrixTranspose(m_worldMatrix);
 	//m_pDevCtx->UpdateSubresource(m_pCBPerBuffer, 0, NULL, &cbPerObj, 0, 0);
 
 	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
@@ -335,15 +348,27 @@ EXIT:
 }
 BOOL CDirect3D::initD3D(HWND hWnd)
 {
+
+	DXGI_MODE_DESC bufferDesc;
+
+	ZeroMemory(&bufferDesc, sizeof(DXGI_MODE_DESC));
+
+	bufferDesc.Width = 800;
+	bufferDesc.Height = 600;
+	bufferDesc.RefreshRate.Numerator = 60;
+	bufferDesc.RefreshRate.Denominator = 1;
+	bufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+	bufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	bufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	DXGI_SWAP_CHAIN_DESC scd;
 	HRESULT hResult = 0;
 	ZeroMemory(&scd, sizeof(DXGI_SWAP_CHAIN_DESC));
 
-
+	scd.BufferDesc = bufferDesc;
 	scd.BufferCount = 1;                                   // one back buffer
-	scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;    // use 32-bit color
-	scd.BufferDesc.Width = 800;                   // set the back buffer width
-	scd.BufferDesc.Height = 600;                 // set the back buffer height
+//	scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;    // use 32-bit color
+	//scd.BufferDesc.Width = 800;                   // set the back buffer width
+//	scd.BufferDesc.Height = 600;                 // set the back buffer height
 	scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;     // how swap chain is to be used
 	scd.OutputWindow = hWnd;                               // the window to be used
 	scd.SampleDesc.Count = 1;                              // how many multisamples
@@ -399,7 +424,17 @@ BOOL CDirect3D::initD3D(HWND hWnd)
 	m_dev->CreateDepthStencilView(depthStencilBuffer, NULL, &depthStencilView);
 
 	m_pDevCtx->OMSetRenderTargets(1, &m_pRenderTargetView, depthStencilView);
-	
+	D3D11_BUFFER_DESC cbbd;
+	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
+
+	cbbd.Usage = D3D11_USAGE_DEFAULT;
+	cbbd.ByteWidth = sizeof(cbPerFrame);
+	cbbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbbd.CPUAccessFlags = 0;
+	cbbd.MiscFlags = 0;
+
+	m_dev->CreateBuffer(&cbbd, NULL, &m_cbPerFrameBuffer);
+
 
 	// Set the viewport
 
@@ -424,7 +459,7 @@ BOOL CDirect3D::initD3D(HWND hWnd)
 
 	
  //Create the buffer to send to the cbuffer in effect file
-	D3D11_BUFFER_DESC cbbd;
+	//D3D11_BUFFER_DESC cbbd;
 	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
 
 	cbbd.Usage = D3D11_USAGE_DYNAMIC;
@@ -496,6 +531,7 @@ void CDirect3D::CleanD3D()
 		m_swapChain->Release();
 		m_swapChain = NULL;
 	}
+	m_cbPerFrameBuffer->Release();
 	depthStencilView->Release();
 	depthStencilBuffer->Release();
 	if (m_pRenderTargetView)
