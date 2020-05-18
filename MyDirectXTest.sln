@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DX3dTest", "DX3dTest\DX3dTe
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DX3dTestWin32", "DX3dTestWin32\DX3dTestWin32.vcxproj", "{B239F1AF-FFEA-43FE-BBED-2F971AC9AD6C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MyDXEngineTest", "MyDXEngineTest\MyDXEngineTest.vcxproj", "{621041B3-7FDB-4A30-97F9-5E819998CB64}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{B239F1AF-FFEA-43FE-BBED-2F971AC9AD6C}.Release|x64.Build.0 = Release|x64
 		{B239F1AF-FFEA-43FE-BBED-2F971AC9AD6C}.Release|x86.ActiveCfg = Release|Win32
 		{B239F1AF-FFEA-43FE-BBED-2F971AC9AD6C}.Release|x86.Build.0 = Release|Win32
+		{621041B3-7FDB-4A30-97F9-5E819998CB64}.Debug|x64.ActiveCfg = Debug|x64
+		{621041B3-7FDB-4A30-97F9-5E819998CB64}.Debug|x64.Build.0 = Debug|x64
+		{621041B3-7FDB-4A30-97F9-5E819998CB64}.Debug|x86.ActiveCfg = Debug|Win32
+		{621041B3-7FDB-4A30-97F9-5E819998CB64}.Debug|x86.Build.0 = Debug|Win32
+		{621041B3-7FDB-4A30-97F9-5E819998CB64}.Release|x64.ActiveCfg = Release|x64
+		{621041B3-7FDB-4A30-97F9-5E819998CB64}.Release|x64.Build.0 = Release|x64
+		{621041B3-7FDB-4A30-97F9-5E819998CB64}.Release|x86.ActiveCfg = Release|Win32
+		{621041B3-7FDB-4A30-97F9-5E819998CB64}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
