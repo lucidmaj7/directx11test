@@ -1,14 +1,20 @@
 #pragma once
 #include "MyDXEngineCommon.h"
 #include "CMYDX3D.h"
-class CMYDXEngine
+#include "CMyDXModel.h"
+#include "CMyDXCam.h"
+class CMYDXEngine : public AlignedAllocationPolicy<16>
 {
 public:
 	CMYDXEngine();
 	~CMYDXEngine();
 	BOOL Initialize(HWND hWnd, float fWidth, float fHeight);
+	BOOL AddModel(CMyDXModel* pModel);
 	void Render();
-private:
 	CMYDX3D m_MyDX3D;
+private:
+	vector< CMyDXModel*> m_vtModelList;
+	
+	CMyDXCam m_Camera;
 };
 

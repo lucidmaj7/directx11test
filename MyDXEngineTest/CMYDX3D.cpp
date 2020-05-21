@@ -20,7 +20,7 @@ void CMYDX3D::BeginScene()
 }
 void CMYDX3D::EndScene()
 {
-	m_pSwapChain->Present(0, 0);
+	m_pSwapChain->Present(1, 0);
 }
 
 void CMYDX3D::CleanUp()
@@ -54,11 +54,11 @@ void CMYDX3D::CleanUp()
 
 }
 
-const ID3D11Device* CMYDX3D::GetDXDevice()
+ ID3D11Device* CMYDX3D::GetDXDevice()
 {
 	return m_pDev;
 }
-const ID3D11DeviceContext* CMYDX3D::GetDXDeviceContext()
+ ID3D11DeviceContext* CMYDX3D::GetDXDeviceContext()
 {
 	return m_pDevCtx;
 }

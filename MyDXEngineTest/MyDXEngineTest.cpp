@@ -13,13 +13,19 @@ WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 
 CMYDXEngine gDXEngine;
+CMyDXModel* pModel1;
+CMyDXModel* pModel2;
+CMyDXModel* pModel3;
+float rot = 0;
+
+
 HWND gWindow = NULL;
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
-
+void UpdateModel();
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
@@ -50,6 +56,27 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         ::MessageBox(gWindow, L"Fail Engine", L"ERROR", MB_ICONERROR | MB_OK);
         return -1;
     }
+    //////////////////////////
+
+    pModel1 = new CMyDXModel();
+    pModel2 = new CMyDXModel();
+    pModel3 = new CMyDXModel();
+    if (pModel1->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(), L"1.jpg"))
+    {
+        gDXEngine.AddModel(pModel1);
+    }
+    if (pModel2->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(), L"2.jpg"))
+    {
+        gDXEngine.AddModel(pModel2);
+    }
+    if (pModel3->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(), L"3.jpg"))
+    {
+        gDXEngine.AddModel(pModel3);
+    }
+
+   
+
+    ///////////////
 
     while (true)
     {
@@ -69,10 +96,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             DispatchMessage(&msg);
         }
         else {
+         
+            UpdateModel();
             gDXEngine.Render();
-            // run game code            
-         //   UpdateScene();
-           // DrawScene();
+        
         }
     }
 
@@ -80,6 +107,30 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 }
 
 
+void UpdateModel()
+{
+    rot += .0100f;
+    if (rot > 6.28f)
+        rot = 0.0f;
+
+    XMVECTOR rotaxis = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+    XMMATRIX Rotation = XMMatrixRotationAxis(rotaxis, rot);
+    XMMATRIX Translation;
+
+    pModel1->setTransformMatrix(Rotation);
+
+
+    rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+    Rotation = XMMatrixRotationAxis(rotaxis, rot);
+    Translation = XMMatrixTranslation(-3.0f, 0.0f, 0.0f);
+    pModel2->setTransformMatrix(Rotation * Translation * Rotation);
+
+    rotaxis = XMVectorSet(1.0f, 1.0f, 0.0f, 0.0f);
+    Rotation = XMMatrixRotationAxis(rotaxis, rot);
+    Translation = XMMatrixTranslation(0.0f, 0.0f, 5.0f);
+    pModel3->setTransformMatrix(Rotation * Translation * Rotation);
+
+}
 
 //
 //  FUNCTION: MyRegisterClass()

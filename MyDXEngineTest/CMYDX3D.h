@@ -3,7 +3,7 @@
 #include "MyDXEngineCommon.h"
 
 
-class CMYDX3D
+class CMYDX3D : public AlignedAllocationPolicy<16>
 {
 public:
 	CMYDX3D();
@@ -12,8 +12,8 @@ public:
 	void CleanUp();
 	void BeginScene();
 	void EndScene();
-	const ID3D11Device* GetDXDevice();
-	const ID3D11DeviceContext* GetDXDeviceContext();
+	 ID3D11Device* GetDXDevice();
+	 ID3D11DeviceContext* GetDXDeviceContext();
 private:
 	ID3D11DeviceContext* m_pDevCtx;
 	IDXGISwapChain* m_pSwapChain;

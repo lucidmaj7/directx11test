@@ -149,7 +149,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CMYDX3D.h" />
+    <ClInclude Include="CMyDXCam.h" />
     <ClInclude Include="CMYDXEngine.h" />
+    <ClInclude Include="CMyDXModel.h" />
+    <ClInclude Include="DirectXTex\DirectXTex.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="MyDXEngineCommon.h" />
     <ClInclude Include="MyDXEngineTest.h" />
@@ -158,7 +161,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CMYDX3D.cpp" />
+    <ClCompile Include="CMyDXCam.cpp" />
     <ClCompile Include="CMYDXEngine.cpp" />
+    <ClCompile Include="CMyDXModel.cpp" />
     <ClCompile Include="MyDXEngineTest.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -167,6 +172,9 @@
   <ItemGroup>
     <Image Include="MyDXEngineTest.ico" />
     <Image Include="small.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders.shader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
