@@ -123,7 +123,7 @@ void UpdateModel()
     rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
     Rotation = XMMatrixRotationAxis(rotaxis, rot);
     Translation = XMMatrixTranslation(-3.0f, 0.0f, 0.0f);
-    pModel2->setTransformMatrix(Rotation * Translation * Rotation);
+    pModel2->setTransformMatrix(Rotation * Translation );
 
     rotaxis = XMVectorSet(1.0f, 1.0f, 0.0f, 0.0f);
     Rotation = XMMatrixRotationAxis(rotaxis, rot);

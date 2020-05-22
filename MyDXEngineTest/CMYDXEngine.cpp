@@ -4,7 +4,10 @@
 
 CMYDXEngine::CMYDXEngine()
 {
-
+	
+	light.dir = XMFLOAT3(0.8f, 0.0f, -1.0f);
+	light.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	light.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 
@@ -21,16 +24,19 @@ BOOL CMYDXEngine::Initialize(HWND hWnd, float fWidth, float fHeight)
 	bSuccess = m_MyDX3D.Initialize(hWnd, fWidth, fHeight);
 
 	bSuccess = m_Camera.CameraInitialize(fWidth, fHeight);
-
+	
 	return bSuccess;
 }
 
 void CMYDXEngine::Render()
 {
+
+	
 	m_MyDX3D.BeginScene();
+
 	for (auto iter = m_vtModelList.begin(); iter != m_vtModelList.end(); iter++)
 	{
-		(*iter)->Render(m_Camera.GetWorldMatrix(), m_Camera.GetProjectionMatrix(), m_Camera.GetCameraMetrix());
+		(*iter)->Render(m_Camera.GetWorldMatrix(), m_Camera.GetProjectionMatrix(), m_Camera.GetCameraMetrix(), light);
 	}
 	
 	m_MyDX3D.EndScene();

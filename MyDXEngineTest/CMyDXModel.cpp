@@ -18,45 +18,45 @@ void CMyDXModel::setTransformMatrix(XMMATRIX matrix)
 }
 
 
-void CMyDXModel::Render(XMMATRIX worldMatrix, XMMATRIX projectionMatrix, XMMATRIX camMatrix)
+void CMyDXModel::Render(XMMATRIX worldMatrix, XMMATRIX projectionMatrix, XMMATRIX camMatrix, Light light)
 {
+
 	UINT stride = sizeof(VERTEX);
 	UINT offset = 0;
-
+	D3D11_MAPPED_SUBRESOURCE ms;
 	
-
 	cbPerObject cbPerObj;
 	DirectX::XMMATRIX WVP;
 
-	//Set cube1's world space using the transformations
-
-	WVP = worldMatrix * m_TransformMatrix * camMatrix * projectionMatrix;
-	cbPerObj.WVP = XMMatrixTranspose(WVP);
-	cbPerObj.World = XMMatrixTranspose(worldMatrix);
-
-
-
-
-
+	m_pDxDevCtx->VSSetShader(m_pVertexShader, 0, 0);
+	m_pDxDevCtx->PSSetShader(m_pPixelShader, 0, 0);
+	m_pDxDevCtx->PSSetShaderResources(0, 1, &m_pTexture);
+	m_pDxDevCtx->PSSetSamplers(0, 1, &m_TextureSamplerState);
 	m_pDxDevCtx->IASetInputLayout(m_pLayout);
+
 	m_pDxDevCtx->IASetVertexBuffers(0, 1, &m_pVBuffer, &stride, &offset);
 	m_pDxDevCtx->IASetIndexBuffer(m_pIdxBuffer, DXGI_FORMAT_R32_UINT, 0);
 	m_pDxDevCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 
-	D3D11_MAPPED_SUBRESOURCE ms;
+	m_constbuffPerFrame.light = light;
+
+	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	m_pDxDevCtx->Map(m_cbPerFrameBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
+	memcpy(ms.pData, &m_constbuffPerFrame, sizeof(m_constbuffPerFrame));                 // copy the data
+	m_pDxDevCtx->Unmap(m_cbPerFrameBuffer, NULL);                                      // unmap the buffer
+	m_pDxDevCtx->PSSetConstantBuffers(0, 1, &m_cbPerFrameBuffer);
+	
+	WVP = worldMatrix * m_TransformMatrix * camMatrix * projectionMatrix;
+	cbPerObj.WVP = XMMatrixTranspose(WVP);
+	cbPerObj.World = XMMatrixTranspose(worldMatrix* m_TransformMatrix);
+
 	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	m_pDxDevCtx->Map(m_pCBPerBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
 	memcpy(ms.pData, &cbPerObj, sizeof(cbPerObj));                 // copy the data
 	m_pDxDevCtx->Unmap(m_pCBPerBuffer, NULL);                                      // unmap the buffer
 	m_pDxDevCtx->VSSetConstantBuffers(0, 1, &m_pCBPerBuffer);
 
-	m_pDxDevCtx->VSSetShader(m_pVertexShader, 0, 0);
-	m_pDxDevCtx->PSSetShader(m_pPixelShader, 0, 0);
-	m_pDxDevCtx->PSSetShaderResources(0, 1, &m_pTexture);
-	m_pDxDevCtx->PSSetSamplers(0, 1, &m_TextureSamplerState);
-	
-	
 
 	m_pDxDevCtx->DrawIndexed(m_dwIndexListSize, 0, 0);
 }
@@ -149,6 +149,11 @@ BOOL CMyDXModel::LoadShader()
 }
 void CMyDXModel::CleanUp()
 {
+	if (m_cbPerFrameBuffer)
+	{
+		m_cbPerFrameBuffer->Release();
+		m_cbPerFrameBuffer = NULL;
+	}
 	if (m_TextureSamplerState)
 	{
 		m_TextureSamplerState->Release();
@@ -194,7 +199,7 @@ void CMyDXModel::CleanUp()
 
 BOOL CMyDXModel::InitalizeModel( ID3D11Device* pDxDev,  ID3D11DeviceContext* pDxDevCtx, const WCHAR* pszTextureFile)
 {
-	
+
 	BOOL bSuccess = TRUE;
 	D3D11_BUFFER_DESC bd;
 	
@@ -267,7 +272,7 @@ BOOL CMyDXModel::InitalizeModel( ID3D11Device* pDxDev,  ID3D11DeviceContext* pDx
 
 	i = 0;
 	m_dwIndexListSize = 36;
-	m_dwIndexList = new DWORD[m_dwIndexListSize];
+	m_dwIndexList = new UINT[m_dwIndexListSize];
 	
 
 	for (i = 0; i < m_dwIndexListSize; i++)
@@ -304,16 +309,6 @@ BOOL CMyDXModel::InitalizeModel( ID3D11Device* pDxDev,  ID3D11DeviceContext* pDx
 		goto EXIT;
 	}
 
-	D3D11_MAPPED_SUBRESOURCE ms;
-	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
-	m_pDxDevCtx->Map(m_pVBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
-	memcpy(ms.pData, m_pVertexList, sizeof(VERTEX)*m_vertexListSize);                 // copy the data
-	m_pDxDevCtx->Unmap(m_pVBuffer, NULL);                                      // unmap the buffer
-
-	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
-	m_pDxDevCtx->Map(m_pIdxBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
-	memcpy(ms.pData, m_dwIndexList, sizeof(DWORD)*m_dwIndexListSize);                 // copy the data
-	m_pDxDevCtx->Unmap(m_pIdxBuffer, NULL);
 
 	if (LoadShader() == FALSE)
 	{
@@ -337,7 +332,32 @@ BOOL CMyDXModel::InitalizeModel( ID3D11Device* pDxDev,  ID3D11DeviceContext* pDx
 	cbbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	cbbd.MiscFlags = 0;
 	m_pDxDev->CreateBuffer(&cbbd, NULL, &m_pCBPerBuffer);
+
+	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
+
+	cbbd.Usage = D3D11_USAGE_DYNAMIC;
+	cbbd.ByteWidth = sizeof(cbPerFrame);
+	cbbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	
+	cbbd.MiscFlags = 0;
+	m_pDxDev->CreateBuffer(&cbbd, NULL, &m_cbPerFrameBuffer);
+
+	D3D11_MAPPED_SUBRESOURCE ms;
+	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	m_pDxDevCtx->Map(m_pVBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
+	memcpy(ms.pData, m_pVertexList, sizeof(VERTEX) * m_vertexListSize);                 // copy the data
+	m_pDxDevCtx->Unmap(m_pVBuffer, NULL);                                      // unmap the buffer
+
+	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	m_pDxDevCtx->Map(m_pIdxBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
+	memcpy(ms.pData, m_dwIndexList, sizeof(DWORD) * m_dwIndexListSize);                 // copy the data
+	m_pDxDevCtx->Unmap(m_pIdxBuffer, NULL);
+
+
+
+	
+
 EXIT:
 	if(bSuccess == FALSE)
 		CleanUp();

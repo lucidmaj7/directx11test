@@ -3,6 +3,7 @@
 #include "CMYDX3D.h"
 #include "CMyDXModel.h"
 #include "CMyDXCam.h"
+
 class CMYDXEngine : public AlignedAllocationPolicy<16>
 {
 public:
@@ -12,6 +13,7 @@ public:
 	BOOL AddModel(CMyDXModel* pModel);
 	void Render();
 	CMYDX3D m_MyDX3D;
+	Light light;
 private:
 	vector< CMyDXModel*> m_vtModelList;
 	
