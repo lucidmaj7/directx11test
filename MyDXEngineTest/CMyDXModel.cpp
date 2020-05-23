@@ -35,7 +35,7 @@ void CMyDXModel::Render(XMMATRIX worldMatrix, XMMATRIX projectionMatrix, XMMATRI
 	m_pDxDevCtx->IASetInputLayout(m_pLayout);
 
 	m_pDxDevCtx->IASetVertexBuffers(0, 1, &m_pVBuffer, &stride, &offset);
-	m_pDxDevCtx->IASetIndexBuffer(m_pIdxBuffer, DXGI_FORMAT_R32_UINT, 0);
+//	m_pDxDevCtx->IASetIndexBuffer(m_pIdxBuffer, DXGI_FORMAT_R32_UINT, 0);
 	m_pDxDevCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 
@@ -57,8 +57,8 @@ void CMyDXModel::Render(XMMATRIX worldMatrix, XMMATRIX projectionMatrix, XMMATRI
 	m_pDxDevCtx->Unmap(m_pCBPerBuffer, NULL);                                      // unmap the buffer
 	m_pDxDevCtx->VSSetConstantBuffers(0, 1, &m_pCBPerBuffer);
 
-
-	m_pDxDevCtx->DrawIndexed(m_dwIndexListSize, 0, 0);
+	m_pDxDevCtx->Draw(m_vertexListSize, 0);
+	//m_pDxDevCtx->DrawIndexed(m_dwIndexListSize, 0, 0);
 }
 
 HRESULT CMyDXModel::LoadTexture(const WCHAR* strTextureFilePath)
@@ -149,6 +149,8 @@ BOOL CMyDXModel::LoadShader()
 }
 void CMyDXModel::CleanUp()
 {
+	m_Object.CleanUp();
+
 	if (m_cbPerFrameBuffer)
 	{
 		m_cbPerFrameBuffer->Release();
@@ -197,89 +199,24 @@ void CMyDXModel::CleanUp()
 	}
 }
 
-BOOL CMyDXModel::InitalizeModel( ID3D11Device* pDxDev,  ID3D11DeviceContext* pDxDevCtx, const WCHAR* pszTextureFile)
+BOOL CMyDXModel::InitalizeModel( ID3D11Device* pDxDev,  ID3D11DeviceContext* pDxDevCtx, const WCHAR* pszModelObjFile, const WCHAR* pszTextureFile)
 {
 
 	BOOL bSuccess = TRUE;
 	D3D11_BUFFER_DESC bd;
-	
-	UINT indexBuf[] = {
-		// Front Face
-				0,  1,  2,
-				0,  2,  3,
 
-				// Back Face
-				4,  5,  6,
-				4,  6,  7,
-
-				// Top Face
-				8,  9, 10,
-				8, 10, 11,
-
-				// Bottom Face
-				12, 13, 14,
-				12, 14, 15,
-
-				// Left Face
-				16, 17, 18,
-				16, 18, 19,
-
-				// Right Face
-				20, 21, 22,
-				20, 22, 23
-	};
-	DWORD i;
 	m_pDxDev = pDxDev;
 	m_pDxDevCtx = pDxDevCtx;
-	m_vertexListSize = 24;
-	m_pVertexList = new VERTEX[m_vertexListSize];
 
-	i = 0;
-	m_pVertexList[i++] = VERTEX(-1.0f, -1.0f, -1.0f, 0.0f, 1.0f, -1.0f, -1.0f, -1.0f);
-	m_pVertexList[i++] = VERTEX(-1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, -1.0f);
-	m_pVertexList[i++] = VERTEX(1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f);
-	m_pVertexList[i++] = VERTEX(1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f);
 
-	// Back Face
-	m_pVertexList[i++] = VERTEX(-1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f);
-	m_pVertexList[i++] = VERTEX(1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 1.0f);
-	m_pVertexList[i++] = VERTEX(1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
-	m_pVertexList[i++] = VERTEX(-1.0f, 1.0f, 1.0f, 1.0f, 0.0f, -1.0f, 1.0f, 1.0f);
 
-	// Top Face
-	m_pVertexList[i++] = VERTEX(-1.0f, 1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 1.0f, -1.0f);
-	m_pVertexList[i++] = VERTEX(-1.0f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f);
-	m_pVertexList[i++] = VERTEX(1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f);
-	m_pVertexList[i++] = VERTEX(1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f);
-
-	// Bottom Face
-	m_pVertexList[i++] = VERTEX(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, -1.0f);
-	m_pVertexList[i++] = VERTEX(1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, -1.0f, -1.0f);
-	m_pVertexList[i++] = VERTEX(1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, -1.0f, 1.0f);
-	m_pVertexList[i++] = VERTEX(-1.0f, -1.0f, 1.0f, 1.0f, 0.0f, -1.0f, -1.0f, 1.0f);
-
-	// Left Face
-	m_pVertexList[i++] = VERTEX(-1.0f, -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 1.0f);
-	m_pVertexList[i++] = VERTEX(-1.0f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f);
-	m_pVertexList[i++] = VERTEX(-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 1.0f, -1.0f);
-	m_pVertexList[i++] = VERTEX(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, -1.0f);
-
-	// Right Face
-	m_pVertexList[i++] = VERTEX(1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, -1.0f, -1.0f);
-	m_pVertexList[i++] = VERTEX(1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, -1.0f);
-	m_pVertexList[i++] = VERTEX(1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f);
-	m_pVertexList[i++] = VERTEX(1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 1.0f);
-
-	i = 0;
-	m_dwIndexListSize = 36;
-	m_dwIndexList = new UINT[m_dwIndexListSize];
-	
-
-	for (i = 0; i < m_dwIndexListSize; i++)
+	if (m_Object.LoadObjFile(pszModelObjFile) != 0)
 	{
-		m_dwIndexList[i] = indexBuf[i];
+		bSuccess = FALSE;
+		goto EXIT;
 	}
-
+	m_vertexListSize = m_Object.m_VertexListSize;
+	m_pVertexList = m_Object.m_pVERTEXList;
 
 	ZeroMemory(&bd, sizeof(bd));
 
@@ -295,7 +232,7 @@ BOOL CMyDXModel::InitalizeModel( ID3D11Device* pDxDev,  ID3D11DeviceContext* pDx
 		goto EXIT;
 	}
 
-	D3D11_BUFFER_DESC idxBufDesc;
+/*	D3D11_BUFFER_DESC idxBufDesc;
 	ZeroMemory(&idxBufDesc, sizeof(idxBufDesc));
 	idxBufDesc.Usage = D3D11_USAGE_DYNAMIC;
 	idxBufDesc.ByteWidth = sizeof(UINT) * m_dwIndexListSize;
@@ -309,7 +246,7 @@ BOOL CMyDXModel::InitalizeModel( ID3D11Device* pDxDev,  ID3D11DeviceContext* pDx
 		goto EXIT;
 	}
 
-
+	*/
 	if (LoadShader() == FALSE)
 	{
 		OutputDebugString(L"LoadShader error\n");
@@ -348,13 +285,13 @@ BOOL CMyDXModel::InitalizeModel( ID3D11Device* pDxDev,  ID3D11DeviceContext* pDx
 	m_pDxDevCtx->Map(m_pVBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
 	memcpy(ms.pData, m_pVertexList, sizeof(VERTEX) * m_vertexListSize);                 // copy the data
 	m_pDxDevCtx->Unmap(m_pVBuffer, NULL);                                      // unmap the buffer
-
+	/*
 	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	m_pDxDevCtx->Map(m_pIdxBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
 	memcpy(ms.pData, m_dwIndexList, sizeof(DWORD) * m_dwIndexListSize);                 // copy the data
 	m_pDxDevCtx->Unmap(m_pIdxBuffer, NULL);
 
-
+	*/
 
 	
 

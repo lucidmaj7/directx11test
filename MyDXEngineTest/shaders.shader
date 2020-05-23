@@ -40,6 +40,8 @@ VOut VShader(float4 position : POSITION, float2 inTexCoord : TEXCOORD, float3 no
 
 float4 PShader(float4 position : SV_POSITION, float2 inTexCoord : TEXCOORD, float3 normal : NORMAL) : SV_TARGET
 {
+    //return float4(1.0f, 0.0f,0.0f,1.0f);
+       // return ObjTexture.Sample(ObjSamplerState, inTexCoord);
 
         normal = normalize(normal);
         float4 diffuse = ObjTexture.Sample(ObjSamplerState, inTexCoord);
@@ -49,5 +51,5 @@ float4 PShader(float4 position : SV_POSITION, float2 inTexCoord : TEXCOORD, floa
         finalColor += saturate(dot(light.dir, normal) * light.diffuse * diffuse);
 
         return float4(finalColor, diffuse.a);
-
+        
 }

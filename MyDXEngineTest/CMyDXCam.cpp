@@ -25,8 +25,8 @@ BOOL CMyDXCam::CameraInitialize(
 	) {
 	m_dwWidth = dwWidth;
 	m_dwHeight = dwHeight;
-	m_camPosition = XMVectorSet(0.0f, 3.0f, -5.0f, 0.0f);
-	m_camTarget = XMVectorSet(0.f, 0.f, 0.f, 0.0f);
+	m_camPosition = XMVectorSet(0.0f, 20.0f, -40.0f, 0.0f);
+	m_camTarget = XMVectorSet(0.f, 10.f, 0.f, 0.0f);
 	m_camUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
 	

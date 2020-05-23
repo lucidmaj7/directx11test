@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DX3dTestWin32", "DX3dTestWi
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MyDXEngineTest", "MyDXEngineTest\MyDXEngineTest.vcxproj", "{621041B3-7FDB-4A30-97F9-5E819998CB64}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "3DObjLoaderTest", "3DObjLoaderTest\3DObjLoaderTest.vcxproj", "{00694249-BB9B-494C-A288-9CC1232B10FD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -41,6 +43,14 @@ Global
 		{621041B3-7FDB-4A30-97F9-5E819998CB64}.Release|x64.Build.0 = Release|x64
 		{621041B3-7FDB-4A30-97F9-5E819998CB64}.Release|x86.ActiveCfg = Release|Win32
 		{621041B3-7FDB-4A30-97F9-5E819998CB64}.Release|x86.Build.0 = Release|Win32
+		{00694249-BB9B-494C-A288-9CC1232B10FD}.Debug|x64.ActiveCfg = Debug|x64
+		{00694249-BB9B-494C-A288-9CC1232B10FD}.Debug|x64.Build.0 = Debug|x64
+		{00694249-BB9B-494C-A288-9CC1232B10FD}.Debug|x86.ActiveCfg = Debug|Win32
+		{00694249-BB9B-494C-A288-9CC1232B10FD}.Debug|x86.Build.0 = Debug|Win32
+		{00694249-BB9B-494C-A288-9CC1232B10FD}.Release|x64.ActiveCfg = Release|x64
+		{00694249-BB9B-494C-A288-9CC1232B10FD}.Release|x64.Build.0 = Release|x64
+		{00694249-BB9B-494C-A288-9CC1232B10FD}.Release|x86.ActiveCfg = Release|Win32
+		{00694249-BB9B-494C-A288-9CC1232B10FD}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

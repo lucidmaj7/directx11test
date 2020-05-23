@@ -181,11 +181,11 @@ void CDirect3D::InitPipeline()
 	m_dev->CreatePixelShader(D2D_PS_Buffer->GetBufferPointer(), D2D_PS_Buffer->GetBufferSize(), NULL, &D2D_PS);
 	m_pDevCtx->VSSetShader(m_pVS, 0, 0);
 	m_pDevCtx->PSSetShader(m_pPS, 0, 0);
-
-
-
-	m_dev->CreateInputLayout(ied, 3, VS->GetBufferPointer(), VS->GetBufferSize(), &m_pLayout);
+m_dev->CreateInputLayout(ied, 3, VS->GetBufferPointer(), VS->GetBufferSize(), &m_pLayout);
 	m_pDevCtx->IASetInputLayout(m_pLayout);
+
+
+	
 
 
 
@@ -225,16 +225,18 @@ void CDirect3D::RanderFrame(void)
 	UINT stride = sizeof(VERTEX);
 	UINT offset = 0;
 
-	m_pDevCtx->IASetVertexBuffers(0, 1, &m_pVBuffer, &stride, &offset);
-	m_pDevCtx->IASetIndexBuffer(m_pIdxBuffer, DXGI_FORMAT_R32_UINT, 0);
-	m_pDevCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
+	
 
 
 	m_pDevCtx->ClearRenderTargetView(m_pRenderTargetView, color);
 
 	//Refresh the Depth/Stencil view
 	m_pDevCtx->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+	m_pDevCtx->IASetVertexBuffers(0, 1, &m_pVBuffer, &stride, &offset);
+	m_pDevCtx->IASetIndexBuffer(m_pIdxBuffer, DXGI_FORMAT_R32_UINT, 0);
+	m_pDevCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
 	m_constbuffPerFrame.light = m_light;
 	m_pDevCtx->UpdateSubresource(m_cbPerFrameBuffer, 0, NULL, &m_constbuffPerFrame, 0, 0);
 	m_pDevCtx->PSSetConstantBuffers(0, 1, &m_cbPerFrameBuffer);

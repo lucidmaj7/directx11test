@@ -1,12 +1,12 @@
 #pragma once
 
-
+#include "C3DObject.h"
 class CMyDXModel: public AlignedAllocationPolicy<16>
 {
 public:
 	CMyDXModel();
 	~CMyDXModel();
-	BOOL InitalizeModel( ID3D11Device* pDxDev,  ID3D11DeviceContext* pDxDevCtx, const WCHAR* pszTextureFile);
+	BOOL InitalizeModel(ID3D11Device* pDxDev, ID3D11DeviceContext* pDxDevCtx, const WCHAR* pszModelObjFile, const WCHAR* pszTextureFile);
 	void Render(XMMATRIX worldMatrix, XMMATRIX projectionMatrix, XMMATRIX camMatrix, Light light);
 	void CleanUp();
 
@@ -36,7 +36,7 @@ private:
 	ID3D11VertexShader* m_pVertexShader;    // the vertex shader
 	ID3D11PixelShader* m_pPixelShader;     // the pixel shader
 	ID3D11InputLayout* m_pLayout;
-
+	C3DObject m_Object;
 	cbPerFrame m_constbuffPerFrame;
 	ID3D11Buffer* m_cbPerFrameBuffer;
 };

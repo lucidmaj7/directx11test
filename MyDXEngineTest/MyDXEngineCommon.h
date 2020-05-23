@@ -3,6 +3,7 @@
 #include <DirectXMath.h>
 #include <d3dcompiler.h>
 #include <vector>
+#include <atlstr.h>
 #include "DirectXTex/DirectXTex.h"
 
 #pragma comment(lib, "d3d11.lib")

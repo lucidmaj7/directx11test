@@ -148,6 +148,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="C3DObject.h" />
     <ClInclude Include="CMYDX3D.h" />
     <ClInclude Include="CMyDXCam.h" />
     <ClInclude Include="CMYDXEngine.h" />
@@ -160,6 +161,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="C3DObject.cpp" />
     <ClCompile Include="CMYDX3D.cpp" />
     <ClCompile Include="CMyDXCam.cpp" />
     <ClCompile Include="CMYDXEngine.cpp" />

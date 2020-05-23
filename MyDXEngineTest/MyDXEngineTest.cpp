@@ -16,6 +16,7 @@ CMYDXEngine gDXEngine;
 CMyDXModel* pModel1;
 CMyDXModel* pModel2;
 CMyDXModel* pModel3;
+CMyDXModel* pModel4;
 float rot = 0;
 
 
@@ -61,19 +62,31 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     pModel1 = new CMyDXModel();
     pModel2 = new CMyDXModel();
     pModel3 = new CMyDXModel();
-    if (pModel1->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(), L"1.jpg"))
+    pModel4 = new CMyDXModel();
+    if (pModel1->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(),L"my.obj" , L"1.jpg"))
     {
         gDXEngine.AddModel(pModel1);
     }
-    if (pModel2->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(), L"2.jpg"))
+    else
+    {
+        ::MessageBox(gWindow, L"Fail to initalize Model 1", L"ERROR", MB_ICONERROR | MB_OK);
+        return -1;
+    }
+
+   if (pModel2->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(), L"plane.obj" ,L"2.jpg"))
     {
         gDXEngine.AddModel(pModel2);
     }
-    if (pModel3->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(), L"3.jpg"))
+   
+    if (pModel3->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(),L"cat.obj", L"Cat_diffuse.jpg"))
     {
         gDXEngine.AddModel(pModel3);
     }
-
+    if (pModel4->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(), L"chair.obj", L"13494_Folding_Chairs_diff.jpg"))
+    {
+        gDXEngine.AddModel(pModel4);
+    }
+    
    
 
     ///////////////
@@ -113,7 +126,7 @@ void UpdateModel()
     if (rot > 6.28f)
         rot = 0.0f;
 
-    XMVECTOR rotaxis = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+    XMVECTOR rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
     XMMATRIX Rotation = XMMatrixRotationAxis(rotaxis, rot);
     XMMATRIX Translation;
 
@@ -122,14 +135,18 @@ void UpdateModel()
 
     rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
     Rotation = XMMatrixRotationAxis(rotaxis, rot);
-    Translation = XMMatrixTranslation(-3.0f, 0.0f, 0.0f);
-    pModel2->setTransformMatrix(Rotation * Translation );
+  //  Translation = XMMatrixTranslation(-3.0f, 0.0f, 0.0f);
+    pModel2->setTransformMatrix(Rotation  );
 
-    rotaxis = XMVectorSet(1.0f, 1.0f, 0.0f, 0.0f);
+    rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
     Rotation = XMMatrixRotationAxis(rotaxis, rot);
-    Translation = XMMatrixTranslation(0.0f, 0.0f, 5.0f);
-    pModel3->setTransformMatrix(Rotation * Translation * Rotation);
-
+    Translation = XMMatrixTranslation(10.0f, 0.0f, 0.0f);
+    pModel3->setTransformMatrix( Translation* Rotation);
+    
+    rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+    Rotation = XMMatrixRotationAxis(rotaxis, rot);
+   // Translation = XMMatrixTranslation(-10.0f, 0.0f, 0.0f);
+    pModel4->setTransformMatrix( Rotation);
 }
 
 //
