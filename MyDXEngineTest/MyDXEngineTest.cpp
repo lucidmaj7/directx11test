@@ -17,6 +17,7 @@ CMyDXModel* pModel1;
 CMyDXModel* pModel2;
 CMyDXModel* pModel3;
 CMyDXModel* pModel4;
+CMyDXModel* pModel5;
 float rot = 0;
 
 
@@ -27,6 +28,39 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 void UpdateModel();
+BOOL CenterWindow(HWND hwndWindow)
+{
+    HWND hwndParent;
+    RECT rectWindow, rectParent;
+
+    // make the window relative to its parent
+    if ((hwndParent = GetParent(hwndWindow)) != NULL)
+    {
+        GetWindowRect(hwndWindow, &rectWindow);
+        GetWindowRect(hwndParent, &rectParent);
+
+        int nWidth = rectWindow.right - rectWindow.left;
+        int nHeight = rectWindow.bottom - rectWindow.top;
+
+        int nX = ((rectParent.right - rectParent.left) - nWidth) / 2 + rectParent.left;
+        int nY = ((rectParent.bottom - rectParent.top) - nHeight) / 2 + rectParent.top;
+
+        int nScreenWidth = GetSystemMetrics(SM_CXSCREEN);
+        int nScreenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+        // make sure that the dialog box never moves outside of the screen
+        if (nX < 0) nX = 0;
+        if (nY < 0) nY = 0;
+        if (nX + nWidth > nScreenWidth) nX = nScreenWidth - nWidth;
+        if (nY + nHeight > nScreenHeight) nY = nScreenHeight - nHeight;
+
+        MoveWindow(hwndWindow, nX, nY, nWidth, nHeight, FALSE);
+
+        return TRUE;
+    }
+
+    return FALSE;
+}
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
@@ -46,13 +80,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     if (!InitInstance (hInstance, nCmdShow))
     {
         return FALSE;
+    
     }
-
+ 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MYDXENGINETEST));
-
+    CenterWindow(gWindow);
     MSG msg;
 
-    if (!gDXEngine.Initialize(gWindow, 800, 600))
+    if (!gDXEngine.Initialize(gWindow, 1280, 720))
     {
         ::MessageBox(gWindow, L"Fail Engine", L"ERROR", MB_ICONERROR | MB_OK);
         return -1;
@@ -63,6 +98,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     pModel2 = new CMyDXModel();
     pModel3 = new CMyDXModel();
     pModel4 = new CMyDXModel();
+    pModel5 = new CMyDXModel();
     if (pModel1->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(),L"my.obj" , L"1.jpg"))
     {
         gDXEngine.AddModel(pModel1);
@@ -78,7 +114,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         gDXEngine.AddModel(pModel2);
     }
    
-    if (pModel3->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(),L"cat.obj", L"Cat_diffuse.jpg"))
+    if (pModel3->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(),L"jessie.obj", L"Jess_Casual_Walking_001_D.jpg"))
     {
         gDXEngine.AddModel(pModel3);
     }
@@ -86,8 +122,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     {
         gDXEngine.AddModel(pModel4);
     }
-    
-   
+    if (pModel5->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(), L"fish.obj", L"fish.png"))
+    {
+        gDXEngine.AddModel(pModel5);
+    }
+
+ 
 
     ///////////////
 
@@ -100,13 +140,85 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             UINT wMsgFilterMax,
             UINT wRemoveMsg
         );
-
+        
         if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
         {
             if (msg.message == WM_QUIT)
                 break;
+            if (msg.message == WM_MOUSEMOVE)
+            {
+               OutputDebugString(L"mouse move\n");
+               POINT pt;
+               GetCursorPos(&pt);
+               POINT centerPT;
+               centerPT.x = 1280 / 2;
+               centerPT.y = 720 / 2;
+
+               if (centerPT.x - pt.x < 0)
+               {
+                   gDXEngine.m_Camera.MoveRightTarget();
+               }
+               if (centerPT.x - pt.x > 0)
+               {
+                   gDXEngine.m_Camera.MoveLeftTarget();
+               }
+               if (centerPT.y- pt.y > 0)
+               {
+                   gDXEngine.m_Camera.MoveUpTarget();
+               }
+               if (centerPT.y - pt.y < 0)
+               {
+                   gDXEngine.m_Camera.MoveDownTarget();
+               }
+             
+
+               SetCursorPos(centerPT.x,centerPT.y);
+            }
+            if (msg.message == WM_CHAR) {
+                switch (msg.wParam)
+                {
+                case 'w':
+                    gDXEngine.m_Camera.MoveFrontPosition();
+                    break;
+                case 's':
+                    gDXEngine.m_Camera.MoveBackPosition();
+                    break;
+                case 'a':
+                    gDXEngine.m_Camera.MoveLeftPosition();
+                    break;
+                case 'd':
+                    gDXEngine.m_Camera.MoveRightPosition();
+                    break;
+                }
+
+            }
+            if (msg.message == WM_KEYDOWN && msg.wParam == VK_ESCAPE)
+            {
+                break;
+            }
+            if (msg.message == WM_KEYDOWN)
+            {
+                switch (msg.wParam)
+                {
+                case VK_LEFT:
+                    gDXEngine.m_Camera.MoveLeftTarget();
+                    break;
+                case VK_RIGHT:
+                    gDXEngine.m_Camera.MoveRightTarget();
+                    break;
+                case VK_UP:
+                    gDXEngine.m_Camera.MoveUpTarget();
+                    break;
+                case VK_DOWN:
+                    gDXEngine.m_Camera.MoveDownTarget();
+                    break;
+                }
+            }
+            
             TranslateMessage(&msg);
             DispatchMessage(&msg);
+
+
         }
         else {
          
@@ -130,23 +242,23 @@ void UpdateModel()
     XMMATRIX Rotation = XMMatrixRotationAxis(rotaxis, rot);
     XMMATRIX Translation;
 
-    pModel1->setTransformMatrix(Rotation);
+//    pModel1->setTransformMatrix(Rotation);
 
 
     rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
     Rotation = XMMatrixRotationAxis(rotaxis, rot);
   //  Translation = XMMatrixTranslation(-3.0f, 0.0f, 0.0f);
-    pModel2->setTransformMatrix(Rotation  );
+ //   pModel2->setTransformMatrix(Rotation  );
 
     rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
     Rotation = XMMatrixRotationAxis(rotaxis, rot);
-    Translation = XMMatrixTranslation(10.0f, 0.0f, 0.0f);
-    pModel3->setTransformMatrix( Translation* Rotation);
+    Translation = XMMatrixTranslation(rot*10, 0.0f, 0.0f);
+    pModel3->setTransformMatrix( Translation);
     
     rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-    Rotation = XMMatrixRotationAxis(rotaxis, rot);
-   // Translation = XMMatrixTranslation(-10.0f, 0.0f, 0.0f);
-    pModel4->setTransformMatrix( Rotation);
+    Rotation = XMMatrixRotationAxis(rotaxis, -rot);
+    Translation = XMMatrixTranslation(-10.0f, 30.0f, 0.0f);
+    pModel5->setTransformMatrix(Translation*Rotation);
 }
 
 //
@@ -188,14 +300,16 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Store instance handle in our global variable
-
+   int nScreenWidth = GetSystemMetrics(SM_CXSCREEN);
+   int nScreenHeight = GetSystemMetrics(SM_CYSCREEN);
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-       CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, nullptr, nullptr, hInstance, nullptr);
+       CW_USEDEFAULT, CW_USEDEFAULT, 1280, 720, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
    {
       return FALSE;
    }
+
    gWindow = hWnd;
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);

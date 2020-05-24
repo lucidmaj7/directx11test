@@ -13,10 +13,11 @@ public:
 	BOOL AddModel(CMyDXModel* pModel);
 	void Render();
 	CMYDX3D m_MyDX3D;
+	CMyDXCam m_Camera;
 	Light light;
 private:
 	vector< CMyDXModel*> m_vtModelList;
 	
-	CMyDXCam m_Camera;
+	
 };
 
