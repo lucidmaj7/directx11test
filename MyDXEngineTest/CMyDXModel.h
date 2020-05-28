@@ -37,7 +37,7 @@ private:
 	ID3D11PixelShader* m_pPixelShader;     // the pixel shader
 	ID3D11InputLayout* m_pLayout;
 	C3DObject m_Object;
-	cbPerFrame m_constbuffPerFrame;
+	//cbPerFrame m_constbuffPerFrame;
 	ID3D11Buffer* m_cbPerFrameBuffer;
 };
 

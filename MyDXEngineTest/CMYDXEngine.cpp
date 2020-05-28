@@ -5,9 +5,7 @@
 CMYDXEngine::CMYDXEngine()
 {
 	
-	light.dir = XMFLOAT3(0.0f, 0.8f, -0.5f);
-	light.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	light.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	
 }
 
 
@@ -31,7 +29,9 @@ BOOL CMYDXEngine::Initialize(HWND hWnd, float fWidth, float fHeight)
 void CMYDXEngine::Render()
 {
 
-	
+	light.dir = XMFLOAT3(0.f, 0.f, 0.f);
+	light.ambient = XMFLOAT4(500.f, 500.f, -500.f, 1.0f);
+	light.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	m_MyDX3D.BeginScene();
 
 	for (auto iter = m_vtModelList.begin(); iter != m_vtModelList.end(); iter++)

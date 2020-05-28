@@ -1,15 +1,16 @@
 
-cbuffer cbPerObject
-{
-    float4x4 WVP;
-    float4x4 World;
-};
 
 struct Light
 {
     float3 dir;
     float4 ambient;
     float4 diffuse;
+}; 
+cbuffer cbPerObject
+{
+    float4x4 WVP;
+    float4x4 World;
+    float4 lightPos;
 };
 
 cbuffer cbPerFrame
@@ -24,32 +25,40 @@ struct VOut
     float4 position : SV_POSITION;
     float2 TexCoord : TEXCOORD;
     float3 normal : NORMAL;
+    float3 mDiffuse : TEXCOORD1;
 };
-
-VOut VShader(float4 position : POSITION, float2 inTexCoord : TEXCOORD, float3 normal : NORMAL)
+struct VIn
+{
+    float4 position : SV_POSITION;
+    float2 TexCoord : TEXCOORD;
+    float3 normal : NORMAL;
+};
+VOut VShader(float4 position : POSITION, float2 inTexCoord : TEXCOORD0, float3 normal : NORMAL)
 {
     VOut output;
 
+    output.position = mul(position, World);
+  
+    float3 lightDir= output.position.xyz - lightPos.xyz;
+    
     output.position = mul(position, WVP);
-    output.normal = mul(normal, World);
+    lightDir = normalize(lightDir);
+    output.normal = normalize(mul(normal, (float3x3)World));
+    output.mDiffuse = dot(-lightDir, output.normal);
     output.TexCoord = inTexCoord;
 
     return output;
 }
 
 
-float4 PShader(float4 position : SV_POSITION, float2 inTexCoord : TEXCOORD, float3 normal : NORMAL) : SV_TARGET
+float4 PShader(float4 position : SV_POSITION, float2 inTexCoord : TEXCOORD, float3 normal : NORMAL, float3 inputdiffuse: TEXCOORD1) : SV_TARGET
 {
-    //return float4(1.0f, 0.0f,0.0f,1.0f);
-       // return ObjTexture.Sample(ObjSamplerState, inTexCoord);
-
-        normal = normalize(normal);
+ 
         float4 diffuse = ObjTexture.Sample(ObjSamplerState, inTexCoord);
-        float3 finalColor;
+        float3 diffuse2 = saturate(inputdiffuse);
+        float3 finalColor = diffuse2 * diffuse;
+ 
 
-        finalColor = diffuse * light.ambient;
-        finalColor += saturate(dot(light.dir, normal) * light.diffuse * diffuse);
-
-        return float4(finalColor, diffuse.a);
+        return float4(finalColor, 1);
         
 }

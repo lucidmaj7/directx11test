@@ -39,18 +39,18 @@ void CMyDXModel::Render(XMMATRIX worldMatrix, XMMATRIX projectionMatrix, XMMATRI
 	m_pDxDevCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 
-	m_constbuffPerFrame.light = light;
-
+	//m_constbuffPerFrame.light = light;
+/*
 	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	m_pDxDevCtx->Map(m_cbPerFrameBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
 	memcpy(ms.pData, &m_constbuffPerFrame, sizeof(m_constbuffPerFrame));                 // copy the data
-	m_pDxDevCtx->Unmap(m_cbPerFrameBuffer, NULL);                                      // unmap the buffer
+	m_pDxDevCtx->Unmap(m_cbPerFrameBuffer, NULL);     // unmap the buffer
 	m_pDxDevCtx->PSSetConstantBuffers(0, 1, &m_cbPerFrameBuffer);
-	
+	*/
 	WVP = worldMatrix * m_TransformMatrix * camMatrix * projectionMatrix;
 	cbPerObj.WVP = XMMatrixTranspose(WVP);
 	cbPerObj.World = XMMatrixTranspose(worldMatrix* m_TransformMatrix);
-
+	cbPerObj.lightPos = XMFLOAT4(100.f,100.f,-100.f,1);
 	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	m_pDxDevCtx->Map(m_pCBPerBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
 	memcpy(ms.pData, &cbPerObj, sizeof(cbPerObj));                 // copy the data
@@ -270,7 +270,7 @@ BOOL CMyDXModel::InitalizeModel( ID3D11Device* pDxDev,  ID3D11DeviceContext* pDx
 	cbbd.MiscFlags = 0;
 	m_pDxDev->CreateBuffer(&cbbd, NULL, &m_pCBPerBuffer);
 
-	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
+/*	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
 
 	cbbd.Usage = D3D11_USAGE_DYNAMIC;
 	cbbd.ByteWidth = sizeof(cbPerFrame);
@@ -279,7 +279,7 @@ BOOL CMyDXModel::InitalizeModel( ID3D11Device* pDxDev,  ID3D11DeviceContext* pDx
 	
 	cbbd.MiscFlags = 0;
 	m_pDxDev->CreateBuffer(&cbbd, NULL, &m_cbPerFrameBuffer);
-
+	*/
 	D3D11_MAPPED_SUBRESOURCE ms;
 	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	m_pDxDevCtx->Map(m_pVBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer

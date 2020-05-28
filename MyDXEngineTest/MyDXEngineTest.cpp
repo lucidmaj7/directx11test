@@ -242,22 +242,22 @@ void UpdateModel()
     XMMATRIX Rotation = XMMatrixRotationAxis(rotaxis, rot);
     XMMATRIX Translation;
 
-//    pModel1->setTransformMatrix(Rotation);
+    pModel1->setTransformMatrix(Rotation);
 
 
     rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
     Rotation = XMMatrixRotationAxis(rotaxis, rot);
-  //  Translation = XMMatrixTranslation(-3.0f, 0.0f, 0.0f);
- //   pModel2->setTransformMatrix(Rotation  );
+   Translation = XMMatrixTranslation(-3.0f, 0.0f, 0.0f);
+  // pModel2->setTransformMatrix(Rotation  );
 
     rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
     Rotation = XMMatrixRotationAxis(rotaxis, rot);
-    Translation = XMMatrixTranslation(rot*10, 0.0f, 0.0f);
-    pModel3->setTransformMatrix( Translation);
+    Translation = XMMatrixTranslation(10.f, 0.0f, 0.0f);
+    pModel3->setTransformMatrix(Rotation *Translation);
     
     rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
     Rotation = XMMatrixRotationAxis(rotaxis, -rot);
-    Translation = XMMatrixTranslation(-10.0f, 30.0f, 0.0f);
+    Translation = XMMatrixTranslation(-30.0f, 30.0f, 0.0f);
     pModel5->setTransformMatrix(Translation*Rotation);
 }
 

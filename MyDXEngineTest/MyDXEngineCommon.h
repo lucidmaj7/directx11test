@@ -44,11 +44,7 @@ typedef struct _VERTEX {
 	DirectX::XMFLOAT3 normal;
 }VERTEX ,*PVERTEX;
 
-struct cbPerObject
-{
-	DirectX::XMMATRIX  WVP;
-	DirectX::XMMATRIX  World;
-};
+
 struct Light
 {
 	Light()
@@ -59,6 +55,12 @@ struct Light
 	float pad;
 	XMFLOAT4 ambient;
 	XMFLOAT4 diffuse;
+};
+struct cbPerObject
+{
+	DirectX::XMMATRIX  WVP;
+	DirectX::XMMATRIX  World;
+	XMFLOAT4 lightPos;
 };
 struct cbPerFrame
 {
