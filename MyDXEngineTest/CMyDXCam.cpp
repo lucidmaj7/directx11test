@@ -29,6 +29,11 @@ XMMATRIX CMyDXCam::GetCameraMetrix()
 	return m_camMatrix;
 }
 
+XMVECTOR CMyDXCam::GetCameraPosition()
+{
+	return m_camPosition;
+}
+
 void CMyDXCam::MoveLeftPosition()
 {
 	m_moveLeftRight -= 0.5f;

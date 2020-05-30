@@ -51,19 +51,38 @@ struct Light
 	{
 		ZeroMemory(this, sizeof(Light));
 	}
-	XMFLOAT3 dir;
-	float pad;
+
 	XMFLOAT4 ambient;
-	XMFLOAT4 diffuse;
 };
+
+struct Material {
+	Material(float specular)
+	{
+		this->specular = XMFLOAT4(specular, specular, specular, 1.f);
+	}
+	Material(XMFLOAT4 specular) {
+		this->specular = specular;
+
+	}
+	Material() {
+		this->specular = XMFLOAT4(0.f,0.f,0.f,1.f);
+
+	}
+	XMFLOAT4 specular;
+
+};
+
+struct cbPerFrame {
+	Material matrial;
+	Light light;
+};
+
 struct cbPerObject
 {
-	DirectX::XMMATRIX  WVP;
-	DirectX::XMMATRIX  World;
+	DirectX::XMMATRIX  WorldMatrix;
+	DirectX::XMMATRIX ViewMatrix;
+	DirectX::XMMATRIX ProjectionMatrix;
 	XMFLOAT4 lightPos;
-};
-struct cbPerFrame
-{
-	Light  light;
+	XMFLOAT4 camPos;
 };
 

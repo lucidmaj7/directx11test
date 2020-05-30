@@ -1,20 +1,28 @@
 #pragma once
 
 #include "C3DObject.h"
+#include "CMyDXCam.h"
 class CMyDXModel: public AlignedAllocationPolicy<16>
 {
 public:
 	CMyDXModel();
 	~CMyDXModel();
-	BOOL InitalizeModel(ID3D11Device* pDxDev, ID3D11DeviceContext* pDxDevCtx, const WCHAR* pszModelObjFile, const WCHAR* pszTextureFile);
-	void Render(XMMATRIX worldMatrix, XMMATRIX projectionMatrix, XMMATRIX camMatrix, Light light);
+	BOOL InitalizeModel(
+		ID3D11Device* pDxDev,
+		ID3D11DeviceContext* pDxDevCtx,
+		const WCHAR* pszModelObjFile,
+		const WCHAR* pszTextureFile,
+		const WCHAR* pszShaderFile,
+		Material matrial
+	);
+	void Render( CMyDXCam* myCam, Light light);
 	void CleanUp();
 
 	void setTransformMatrix(XMMATRIX matrix);
 
 	XMMATRIX GetTranslation();
 private:
-	BOOL LoadShader();
+	BOOL LoadShader(const WCHAR* shaderFile);
 	HRESULT LoadTexture(const WCHAR* strTextureFilePath);
 	
 private:
@@ -37,7 +45,9 @@ private:
 	ID3D11PixelShader* m_pPixelShader;     // the pixel shader
 	ID3D11InputLayout* m_pLayout;
 	C3DObject m_Object;
-	//cbPerFrame m_constbuffPerFrame;
+	cbPerFrame m_constbuffPerFrame;
 	ID3D11Buffer* m_cbPerFrameBuffer;
+	Material m_material;
+	
 };
 

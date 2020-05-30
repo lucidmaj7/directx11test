@@ -19,7 +19,7 @@ public:
 	XMMATRIX GetWorldMatrix();
 	XMMATRIX GetProjectionMatrix();
 	XMMATRIX GetCameraMetrix();
-
+	XMVECTOR GetCameraPosition();
 	void MoveLeftPosition();
 	void MoveRightPosition();
 	void MoveFrontPosition();

@@ -18,6 +18,8 @@ CMyDXModel* pModel2;
 CMyDXModel* pModel3;
 CMyDXModel* pModel4;
 CMyDXModel* pModel5;
+CMyDXModel* pModel6;
+CMyDXModel* pStaue1;
 float rot = 0;
 
 
@@ -87,7 +89,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     CenterWindow(gWindow);
     MSG msg;
 
-    if (!gDXEngine.Initialize(gWindow, 1280, 720))
+    if (!gDXEngine.Initialize(gWindow, 1920, 1080))
     {
         ::MessageBox(gWindow, L"Fail Engine", L"ERROR", MB_ICONERROR | MB_OK);
         return -1;
@@ -99,7 +101,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     pModel3 = new CMyDXModel();
     pModel4 = new CMyDXModel();
     pModel5 = new CMyDXModel();
-    if (pModel1->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(),L"my.obj" , L"1.jpg"))
+    pModel6 = new CMyDXModel();
+    pStaue1 = new CMyDXModel();
+    if (pModel1->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(),L"my.obj" , L"1.jpg", L"shaders.shader", Material(10.f)))
     {
         gDXEngine.AddModel(pModel1);
     }
@@ -109,26 +113,32 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         return -1;
     }
 
-   if (pModel2->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(), L"plane.obj" ,L"2.jpg"))
+    if (pModel2->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(), L"plane.obj", L"2.jpg", L"shaders.shader", Material(0.f)))
     {
         gDXEngine.AddModel(pModel2);
     }
    
-    if (pModel3->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(),L"jessie.obj", L"Jess_Casual_Walking_001_D.jpg"))
+    if (pModel3->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(),L"jessie.obj", L"Jess_Casual_Walking_001_D.jpg", L"shaders.shader", Material(0.f)))
     {
         gDXEngine.AddModel(pModel3);
     }
-    if (pModel4->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(), L"chair.obj", L"13494_Folding_Chairs_diff.jpg"))
+    if (pModel4->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(), L"chair.obj", L"13494_Folding_Chairs_diff.jpg", L"shaders.shader", Material(50.f)))
     {
         gDXEngine.AddModel(pModel4);
     }
-    if (pModel5->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(), L"fish.obj", L"fish.png"))
+    if (pModel5->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(), L"fish.obj", L"fish.png", L"shaders.shader", Material(50.f)))
     {
         gDXEngine.AddModel(pModel5);
     }
-
+    if (pModel6->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(), L"skull.obj", L"skull.jpg", L"shaders.shader", Material(200.f)))
+    {
+        gDXEngine.AddModel(pModel6);
+    }
  
-
+    if (pStaue1->InitalizeModel(gDXEngine.m_MyDX3D.GetDXDevice(), gDXEngine.m_MyDX3D.GetDXDeviceContext(), L"statue.obj", L"statue.jpg", L"shaders.shader", Material(200.f)))
+    {
+        gDXEngine.AddModel(pStaue1);
+    }
     ///////////////
 
     while (true)
@@ -247,18 +257,28 @@ void UpdateModel()
 
     rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
     Rotation = XMMatrixRotationAxis(rotaxis, rot);
-   Translation = XMMatrixTranslation(-3.0f, 0.0f, 0.0f);
+   Translation = XMMatrixTranslation(-0.0f, 0.0f, 0.0f);
   // pModel2->setTransformMatrix(Rotation  );
 
     rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
     Rotation = XMMatrixRotationAxis(rotaxis, rot);
-    Translation = XMMatrixTranslation(10.f, 0.0f, 0.0f);
+    Translation = XMMatrixTranslation(20.f, 0.0f, 0.0f);
     pModel3->setTransformMatrix(Rotation *Translation);
     
     rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
     Rotation = XMMatrixRotationAxis(rotaxis, -rot);
     Translation = XMMatrixTranslation(-30.0f, 30.0f, 0.0f);
     pModel5->setTransformMatrix(Translation*Rotation);
+
+    rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+    Rotation = XMMatrixRotationAxis(rotaxis, -rot);
+    Translation = XMMatrixTranslation(50.0f, 0.f, 0.0f);
+    pModel6->setTransformMatrix(Rotation* Translation);
+
+    rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+    Rotation = XMMatrixRotationAxis(rotaxis, -rot);
+    Translation = XMMatrixTranslation(-50.0f, 0.f, -50.0f);
+    pStaue1->setTransformMatrix(Rotation * Translation);
 }
 
 //
@@ -303,7 +323,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    int nScreenWidth = GetSystemMetrics(SM_CXSCREEN);
    int nScreenHeight = GetSystemMetrics(SM_CYSCREEN);
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-       CW_USEDEFAULT, CW_USEDEFAULT, 1280, 720, nullptr, nullptr, hInstance, nullptr);
+       CW_USEDEFAULT, CW_USEDEFAULT, 1920, 1080, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
    {

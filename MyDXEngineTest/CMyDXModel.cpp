@@ -12,21 +12,25 @@ CMyDXModel::~CMyDXModel()
 {
 
 }
+
 void CMyDXModel::setTransformMatrix(XMMATRIX matrix)
 {
 	m_TransformMatrix = matrix;
 }
 
 
-void CMyDXModel::Render(XMMATRIX worldMatrix, XMMATRIX projectionMatrix, XMMATRIX camMatrix, Light light)
+void CMyDXModel::Render(CMyDXCam* myCam, Light light)
 {
 
 	UINT stride = sizeof(VERTEX);
 	UINT offset = 0;
 	D3D11_MAPPED_SUBRESOURCE ms;
-	
+	XMMATRIX worldMatrix = myCam->GetWorldMatrix();
+	XMMATRIX viewMatrix = myCam->GetCameraMetrix();
+	XMMATRIX ProjectionMatrix = myCam->GetProjectionMatrix();
+	XMVECTOR camPosition = myCam->GetCameraPosition();
 	cbPerObject cbPerObj;
-	DirectX::XMMATRIX WVP;
+	
 
 	m_pDxDevCtx->VSSetShader(m_pVertexShader, 0, 0);
 	m_pDxDevCtx->PSSetShader(m_pPixelShader, 0, 0);
@@ -38,19 +42,19 @@ void CMyDXModel::Render(XMMATRIX worldMatrix, XMMATRIX projectionMatrix, XMMATRI
 //	m_pDxDevCtx->IASetIndexBuffer(m_pIdxBuffer, DXGI_FORMAT_R32_UINT, 0);
 	m_pDxDevCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+	m_constbuffPerFrame.light = light;
+	m_constbuffPerFrame.matrial = m_material;
+	
+	cbPerObj.WorldMatrix = XMMatrixTranspose(worldMatrix*m_TransformMatrix );
+	cbPerObj.ProjectionMatrix = XMMatrixTranspose(ProjectionMatrix);
+	cbPerObj.ViewMatrix = XMMatrixTranspose(viewMatrix);
 
-	//m_constbuffPerFrame.light = light;
-/*
-	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
-	m_pDxDevCtx->Map(m_cbPerFrameBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
-	memcpy(ms.pData, &m_constbuffPerFrame, sizeof(m_constbuffPerFrame));                 // copy the data
-	m_pDxDevCtx->Unmap(m_cbPerFrameBuffer, NULL);     // unmap the buffer
-	m_pDxDevCtx->PSSetConstantBuffers(0, 1, &m_cbPerFrameBuffer);
-	*/
-	WVP = worldMatrix * m_TransformMatrix * camMatrix * projectionMatrix;
-	cbPerObj.WVP = XMMatrixTranspose(WVP);
-	cbPerObj.World = XMMatrixTranspose(worldMatrix* m_TransformMatrix);
-	cbPerObj.lightPos = XMFLOAT4(100.f,100.f,-100.f,1);
+	cbPerObj.lightPos = XMFLOAT4(100.f, 150.f, -100.f, 1);
+
+	XMFLOAT4 pos;
+	XMStoreFloat4(&pos, camPosition);
+	cbPerObj.camPos = pos;
+
 	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	m_pDxDevCtx->Map(m_pCBPerBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
 	memcpy(ms.pData, &cbPerObj, sizeof(cbPerObj));                 // copy the data
@@ -58,6 +62,14 @@ void CMyDXModel::Render(XMMATRIX worldMatrix, XMMATRIX projectionMatrix, XMMATRI
 	m_pDxDevCtx->VSSetConstantBuffers(0, 1, &m_pCBPerBuffer);
 
 	m_pDxDevCtx->Draw(m_vertexListSize, 0);
+
+	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	m_pDxDevCtx->Map(m_cbPerFrameBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
+	memcpy(ms.pData, &m_constbuffPerFrame, sizeof(m_constbuffPerFrame));                 // copy the data
+	m_pDxDevCtx->Unmap(m_cbPerFrameBuffer, NULL);     // unmap the buffer
+	m_pDxDevCtx->PSSetConstantBuffers(0, 1, &m_cbPerFrameBuffer);
+	
+
 	//m_pDxDevCtx->DrawIndexed(m_dwIndexListSize, 0, 0);
 }
 
@@ -112,18 +124,23 @@ EXIT:
 
 	return hr;
 }
-BOOL CMyDXModel::LoadShader()
+BOOL CMyDXModel::LoadShader(const WCHAR* shaderFile)
 {
+	if (!PathFileExists(shaderFile))
+	{
+		OutputDebugString(L"shader file not exists error \n");
+		return FALSE;
+	}
 
 	
 
 
-	if (FAILED(D3DCompileFromFile(L"shaders.shader", 0, 0, "PShader", "ps_4_0", 0, 0, &PS, 0)))
+	if (FAILED(D3DCompileFromFile(shaderFile ,0, 0, "PShader", "ps_4_0", 0, 0, &PS, 0)))
 	{
 		OutputDebugString(L"D3DCompileFromFile error ps\n");
 		return FALSE;
 	}
-	if (FAILED(D3DCompileFromFile(L"shaders.shader", 0, 0, "VShader", "vs_4_0", 0, 0, &VS, 0)))
+	if (FAILED(D3DCompileFromFile(shaderFile, 0, 0, "VShader", "vs_4_0", 0, 0, &VS, 0)))
 	{
 		OutputDebugString(L"D3DCompileFromFile error vs\n");
 		return FALSE;
@@ -199,7 +216,14 @@ void CMyDXModel::CleanUp()
 	}
 }
 
-BOOL CMyDXModel::InitalizeModel( ID3D11Device* pDxDev,  ID3D11DeviceContext* pDxDevCtx, const WCHAR* pszModelObjFile, const WCHAR* pszTextureFile)
+BOOL CMyDXModel::InitalizeModel(
+	ID3D11Device* pDxDev,
+	ID3D11DeviceContext* pDxDevCtx,
+	const WCHAR* pszModelObjFile,
+	const WCHAR* pszTextureFile,
+	const WCHAR* pszShaderFile,
+	Material matrial
+)
 {
 
 	BOOL bSuccess = TRUE;
@@ -208,7 +232,7 @@ BOOL CMyDXModel::InitalizeModel( ID3D11Device* pDxDev,  ID3D11DeviceContext* pDx
 	m_pDxDev = pDxDev;
 	m_pDxDevCtx = pDxDevCtx;
 
-
+	m_material = matrial;
 
 	if (m_Object.LoadObjFile(pszModelObjFile) != 0)
 	{
@@ -232,7 +256,7 @@ BOOL CMyDXModel::InitalizeModel( ID3D11Device* pDxDev,  ID3D11DeviceContext* pDx
 		goto EXIT;
 	}
 
-/*	D3D11_BUFFER_DESC idxBufDesc;
+	/*D3D11_BUFFER_DESC idxBufDesc;
 	ZeroMemory(&idxBufDesc, sizeof(idxBufDesc));
 	idxBufDesc.Usage = D3D11_USAGE_DYNAMIC;
 	idxBufDesc.ByteWidth = sizeof(UINT) * m_dwIndexListSize;
@@ -245,9 +269,9 @@ BOOL CMyDXModel::InitalizeModel( ID3D11Device* pDxDev,  ID3D11DeviceContext* pDx
 		bSuccess = FALSE;
 		goto EXIT;
 	}
-
 	*/
-	if (LoadShader() == FALSE)
+	
+	if (LoadShader(pszShaderFile) == FALSE)
 	{
 		OutputDebugString(L"LoadShader error\n");
 		bSuccess = FALSE;
@@ -270,7 +294,7 @@ BOOL CMyDXModel::InitalizeModel( ID3D11Device* pDxDev,  ID3D11DeviceContext* pDx
 	cbbd.MiscFlags = 0;
 	m_pDxDev->CreateBuffer(&cbbd, NULL, &m_pCBPerBuffer);
 
-/*	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
+	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
 
 	cbbd.Usage = D3D11_USAGE_DYNAMIC;
 	cbbd.ByteWidth = sizeof(cbPerFrame);
@@ -279,7 +303,7 @@ BOOL CMyDXModel::InitalizeModel( ID3D11Device* pDxDev,  ID3D11DeviceContext* pDx
 	
 	cbbd.MiscFlags = 0;
 	m_pDxDev->CreateBuffer(&cbbd, NULL, &m_cbPerFrameBuffer);
-	*/
+	
 	D3D11_MAPPED_SUBRESOURCE ms;
 	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	m_pDxDevCtx->Map(m_pVBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
