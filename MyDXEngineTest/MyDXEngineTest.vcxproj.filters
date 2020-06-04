@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="MyDXEngine">
+      <UniqueIdentifier>{1a43d7d6-6146-48ad-b045-f8b97246b8af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MyDXEngine\DirectXTex">
+      <UniqueIdentifier>{a4a0d98f-7060-4a50-a1cd-09e02ecf337e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -27,46 +33,49 @@
     <ClInclude Include="MyDXEngineTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CMYDXEngine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CMYDX3D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MyDXEngineCommon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CMyDXModel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DirectXTex\DirectXTex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CMyDXCam.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\MyDxEngine\C3DObject.h">
+      <Filter>MyDXEngine</Filter>
     </ClInclude>
-    <ClInclude Include="C3DObject.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\MyDxEngine\CMYDX3D.h">
+      <Filter>MyDXEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\MyDxEngine\CMyDXCam.h">
+      <Filter>MyDXEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\MyDxEngine\CMYDXEngine.h">
+      <Filter>MyDXEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\MyDxEngine\CMyDXModel.h">
+      <Filter>MyDXEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\MyDxEngine\MyDXEngineCommon.h">
+      <Filter>MyDXEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\MyDxEngine\DirectXTex\DirectXTex.h">
+      <Filter>MyDXEngine\DirectXTex</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MyDXEngineTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CMYDXEngine.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\MyDxEngine\C3DObject.cpp">
+      <Filter>MyDXEngine</Filter>
     </ClCompile>
-    <ClCompile Include="CMYDX3D.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\MyDxEngine\CMYDX3D.cpp">
+      <Filter>MyDXEngine</Filter>
     </ClCompile>
-    <ClCompile Include="CMyDXModel.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\MyDxEngine\CMyDXCam.cpp">
+      <Filter>MyDXEngine</Filter>
     </ClCompile>
-    <ClCompile Include="CMyDXCam.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\MyDxEngine\CMYDXEngine.cpp">
+      <Filter>MyDXEngine</Filter>
     </ClCompile>
-    <ClCompile Include="C3DObject.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\MyDxEngine\CMyDXModel.cpp">
+      <Filter>MyDXEngine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

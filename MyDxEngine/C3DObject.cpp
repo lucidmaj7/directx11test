@@ -1,4 +1,4 @@
-#include "../MyDXEngineTest/MyDXEngineCommon.h"
+#include "MyDXEngineCommon.h"
 #include "C3DObject.h"
 
 #include <Shlwapi.h>

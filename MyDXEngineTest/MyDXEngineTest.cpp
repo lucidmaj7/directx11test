@@ -5,6 +5,7 @@
 #include "MyDXEngineTest.h"
 #include "CMYDXEngine.h"
 
+
 #define MAX_LOADSTRING 100
 
 // Global Variables:

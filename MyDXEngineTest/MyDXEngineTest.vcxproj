@@ -91,10 +91,14 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>..\MyDxEngine;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalUsingDirectories>
+      </AdditionalUsingDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\MyDxEngine</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -148,24 +152,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="C3DObject.h" />
-    <ClInclude Include="CMYDX3D.h" />
-    <ClInclude Include="CMyDXCam.h" />
-    <ClInclude Include="CMYDXEngine.h" />
-    <ClInclude Include="CMyDXModel.h" />
+    <ClInclude Include="..\MyDxEngine\C3DObject.h" />
+    <ClInclude Include="..\MyDxEngine\CMYDX3D.h" />
+    <ClInclude Include="..\MyDxEngine\CMyDXCam.h" />
+    <ClInclude Include="..\MyDxEngine\CMYDXEngine.h" />
+    <ClInclude Include="..\MyDxEngine\CMyDXModel.h" />
+    <ClInclude Include="..\MyDxEngine\DirectXTex\DirectXTex.h" />
+    <ClInclude Include="..\MyDxEngine\MyDXEngineCommon.h" />
     <ClInclude Include="DirectXTex\DirectXTex.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="MyDXEngineCommon.h" />
     <ClInclude Include="MyDXEngineTest.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="C3DObject.cpp" />
-    <ClCompile Include="CMYDX3D.cpp" />
-    <ClCompile Include="CMyDXCam.cpp" />
-    <ClCompile Include="CMYDXEngine.cpp" />
-    <ClCompile Include="CMyDXModel.cpp" />
+    <ClCompile Include="..\MyDxEngine\C3DObject.cpp" />
+    <ClCompile Include="..\MyDxEngine\CMYDX3D.cpp" />
+    <ClCompile Include="..\MyDxEngine\CMyDXCam.cpp" />
+    <ClCompile Include="..\MyDxEngine\CMYDXEngine.cpp" />
+    <ClCompile Include="..\MyDxEngine\CMyDXModel.cpp" />
     <ClCompile Include="MyDXEngineTest.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -10,6 +10,8 @@
 #pragma comment(lib,"D3DCompiler.lib")
 #pragma comment(lib, "DirectXTex\\lib\\DirectXTexd.lib")
 
+
+
 using namespace std;
 using namespace DirectX;
 
