@@ -10,12 +10,13 @@
 
 
 
-HRESULT InitializeDX3D(HWND hwnd, UINT width, UINT height);
-
+HRESULT InitializeDX3D(HWND hwnd, UINT width, UINT height, const WCHAR* obj, const WCHAR* shaderFile);
+BOOL LoadShader(const WCHAR* shaderFile);
 void DX3DCleanup();
 void BeginScene();
 void EndScene();
-
+void Render();
+BOOL LoadModel(const WCHAR* objFile);
 
 
 

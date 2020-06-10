@@ -1,4 +1,14 @@
 #include "dxshader.h"
+#include <Shlwapi.h>
+#include "C3DObject.h"
+#include "CMyDXCam.h"
+
+typedef struct _VS_CONST_BUFFER {
+	XMMATRIX worldMatrix;
+	XMMATRIX projectionMatrix;
+	XMMATRIX viewMatrix;
+	XMFLOAT4 lightPos;
+}VS_CONST_BUFFER,*PVS_CONST_BUFFER;
 
 ID3D11Device* gDXDevice = NULL;
 ID3D11DeviceContext* gDXDeviceContext = NULL;
@@ -6,9 +16,49 @@ IDXGISwapChain* gDXSwapChain = NULL;
 ID3D11RenderTargetView* gDXRenderTargetView = NULL;
 ID3D11Texture2D* gDXDepthStencilBuffer = NULL;
 ID3D11DepthStencilView* gDXDepthStencilView = NULL;
+ID3D11VertexShader* gVertexShader = NULL;    // the vertex shader
+ID3D11PixelShader* gPixelShader = NULL;
+ID3D11InputLayout* gInputLayout= NULL;
+ID3D11Buffer* gVBuffer = NULL;
+ID3D11Buffer* gVertexConstBuffer = NULL;
+VS_CONST_BUFFER gVSConstBuffer;
+CMyDXCam gCamera;
+C3DObject g3DObject;
+float rot = 0.f;
+const D3D11_INPUT_ELEMENT_DESC ied[] =
+{
+	{ "SV_POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0}
+};
+
 void DX3DCleanup()
 {
-
+	if (gVertexConstBuffer)
+	{
+		gVertexConstBuffer->Release();
+		gVertexConstBuffer = NULL;
+	}
+	if (gVBuffer)
+	{
+		gVBuffer->Release();
+		gVBuffer = NULL;
+	}
+	if (gPixelShader)
+	{
+		gPixelShader->Release();
+		gPixelShader = NULL;
+	}
+	if (gVertexShader)
+	{
+		gVertexShader->Release();
+		gVertexShader = NULL;
+	}
+	if (gInputLayout)
+	{
+		gInputLayout->Release();
+		gInputLayout = NULL;
+	}
 	if (gDXDepthStencilBuffer)
 	{
 		gDXDepthStencilBuffer->Release();
@@ -37,7 +87,73 @@ void DX3DCleanup()
 
 }
 
-HRESULT InitializeDX3D(HWND hwnd, UINT width,UINT height)
+BOOL LoadModel(const WCHAR* objFile)
+{
+	DWORD dwVertexSize = 0;
+
+	int nRet = g3DObject.LoadObjFile(objFile);
+	if (nRet != 0)
+		return FALSE;
+	
+	D3D11_BUFFER_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
+
+	bd.Usage = D3D11_USAGE_DYNAMIC;                // write access access by CPU and GPU
+	bd.ByteWidth = sizeof(VERTEX) * g3DObject.m_VertexListSize;             // size is the VERTEX struct * 3
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;       // use as a vertex buffer
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;    // allow CPU to write in buffer
+
+	if (FAILED(gDXDevice->CreateBuffer(&bd, NULL, &gVBuffer)))      // create the buffer
+	{
+		OutputDebugString(L"vertext buffer error");
+		return FALSE;
+	}
+	D3D11_MAPPED_SUBRESOURCE ms;
+	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	gDXDeviceContext->Map(gVBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
+	memcpy(ms.pData, g3DObject.m_pVERTEXList, sizeof(VERTEX) * g3DObject.m_VertexListSize);                 // copy the data
+	gDXDeviceContext->Unmap(gVBuffer, NULL);
+
+	return TRUE;
+}
+BOOL LoadShader(const WCHAR* shaderFile)
+{
+	ID3DBlob* VS; ID3DBlob* PS;
+	HRESULT hResult = 0;
+	if (!PathFileExists(shaderFile))
+	{
+		OutputDebugString(L"shader file not exists error \n");
+		return FALSE;
+	}
+	hResult = D3DCompileFromFile(shaderFile, 0, 0, "vs_main","vs_4_0", 0, 0, &VS, 0);
+	if (FAILED(hResult))
+	{
+		return FALSE;
+	}
+	hResult = D3DCompileFromFile(shaderFile, 0, 0, "ps_main", "ps_4_0", 0, 0, &PS, 0);
+	if (FAILED(hResult))
+	{
+		return FALSE;
+	}
+
+	hResult = gDXDevice->CreateVertexShader(VS->GetBufferPointer(), VS->GetBufferSize(), 0, &gVertexShader);
+	if (FAILED(hResult))
+	{
+		return FALSE;
+	}
+	hResult = gDXDevice->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), 0, &gPixelShader);
+	if (FAILED(hResult))
+	{
+		return FALSE;
+	}
+	hResult =  gDXDevice->CreateInputLayout(ied, 3, VS->GetBufferPointer(), VS->GetBufferSize(), &gInputLayout);
+	if (FAILED(hResult))
+	{
+		return FALSE;
+	}
+	return TRUE;
+}
+HRESULT InitializeDX3D(HWND hwnd, UINT width,UINT height, const WCHAR* obj,const WCHAR* shaderFile)
 {
 
 	HRESULT hResult = 0;
@@ -148,6 +264,32 @@ HRESULT InitializeDX3D(HWND hwnd, UINT width,UINT height)
 
 	gDXDeviceContext->RSSetViewports(1, &viewPort);
 
+	if (!LoadShader(shaderFile))
+	{
+		hResult = E_FAIL;
+		goto ERROR_EXIT;
+	}
+	if (!LoadModel(obj))
+	{
+		hResult = E_FAIL;
+		goto ERROR_EXIT;
+	}
+	D3D11_BUFFER_DESC cbbd;
+	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
+
+	cbbd.Usage = D3D11_USAGE_DYNAMIC;
+	cbbd.ByteWidth = sizeof(VS_CONST_BUFFER);
+	cbbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbbd.MiscFlags = 0;
+	gDXDevice->CreateBuffer(&cbbd, NULL, &gVertexConstBuffer);
+
+	
+	gCamera.CameraInitialize(width, height, 
+		XMVectorSet(0.0f, 0.0f, -10.0f, 0.0f), 
+		XMVectorSet(0.f, 0.f, 0.f, 0.0f), 
+		XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
+
 	hResult = ERROR_SUCCESS;
 	goto EXIT;
 
@@ -163,7 +305,37 @@ EXIT:
 	return hResult;
 
 }
+void Render()
+{
+	rot += .0100f;
+	if (rot > 6.28f)
+		rot = 0.0f;
 
+	XMVECTOR rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	XMMATRIX Rotation = XMMatrixRotationAxis(rotaxis, rot);
+	D3D11_MAPPED_SUBRESOURCE ms;
+	UINT stride = sizeof(VERTEX);
+	UINT offset = 0;
+	gDXDeviceContext->VSSetShader(gVertexShader, 0, 0);
+	gDXDeviceContext->PSSetShader(gPixelShader, 0, 0);
+	gDXDeviceContext->IASetInputLayout(gInputLayout);
+
+	gDXDeviceContext->IASetVertexBuffers(0, 1, &gVBuffer, &stride, &offset);
+	gDXDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	gVSConstBuffer.projectionMatrix = XMMatrixTranspose(gCamera.GetProjectionMatrix());// XMMatrixIdentity();
+	gVSConstBuffer.viewMatrix = XMMatrixTranspose(gCamera.GetCameraMetrix());
+	gVSConstBuffer.worldMatrix = XMMatrixTranspose( gCamera.GetWorldMatrix() * Rotation);
+	gVSConstBuffer.lightPos = XMFLOAT4(100.f, 100.f, -100.f, 1.0f),
+	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	gDXDeviceContext->Map(gVertexConstBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
+	memcpy(ms.pData, &gVSConstBuffer, sizeof(gVSConstBuffer));                 // copy the data
+	gDXDeviceContext->Unmap(gVertexConstBuffer, NULL);                                      // unmap the buffer
+	gDXDeviceContext->VSSetConstantBuffers(0, 1, &gVertexConstBuffer);
+
+	gDXDeviceContext->Draw(g3DObject.m_VertexListSize, 0);
+
+}
 void BeginScene()
 {
 	const float bgColor[4] = { 0.f,0.f,0.f,1.0f };

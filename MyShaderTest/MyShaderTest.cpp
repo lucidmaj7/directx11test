@@ -46,7 +46,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MYSHADERTEST));
 
 
-   HRESULT hResult =  InitializeDX3D(hwnd, WINDOW_WIDTH, WINDOW_HEIGHT);
+   HRESULT hResult =  InitializeDX3D(hwnd, WINDOW_WIDTH, WINDOW_HEIGHT, L"obj.obj",L"shader.fx");
    if (FAILED(hResult))
    {
        ::MessageBox(NULL, L"Error InitializeDX3D!!", L"ERROR", MB_ICONERROR | MB_OK);
@@ -76,6 +76,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         else {
             //render 
             BeginScene();
+            Render();
             EndScene();
         }
     }
