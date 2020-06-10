@@ -8,6 +8,7 @@ typedef struct _VS_CONST_BUFFER {
 	XMMATRIX projectionMatrix;
 	XMMATRIX viewMatrix;
 	XMFLOAT4 lightPos;
+	XMFLOAT4 camPos;
 }VS_CONST_BUFFER,*PVS_CONST_BUFFER;
 
 ID3D11Device* gDXDevice = NULL;
@@ -326,7 +327,10 @@ void Render()
 	gVSConstBuffer.projectionMatrix = XMMatrixTranspose(gCamera.GetProjectionMatrix());// XMMatrixIdentity();
 	gVSConstBuffer.viewMatrix = XMMatrixTranspose(gCamera.GetCameraMetrix());
 	gVSConstBuffer.worldMatrix = XMMatrixTranspose( gCamera.GetWorldMatrix() * Rotation);
-	gVSConstBuffer.lightPos = XMFLOAT4(100.f, 100.f, -100.f, 1.0f),
+	gVSConstBuffer.lightPos = XMFLOAT4(100.f, 100.f, -100.f, 1.0f);
+	XMFLOAT4 pos;
+	XMStoreFloat4(&pos, gCamera.GetCameraPosition());
+	gVSConstBuffer.camPos = pos;
 	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	gDXDeviceContext->Map(gVertexConstBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
 	memcpy(ms.pData, &gVSConstBuffer, sizeof(gVSConstBuffer));                 // copy the data
