@@ -11,6 +11,11 @@ typedef struct _VS_CONST_BUFFER {
 	XMFLOAT4 camPos;
 }VS_CONST_BUFFER,*PVS_CONST_BUFFER;
 
+
+typedef struct _PS_CONST_BUFFER {
+	XMFLOAT4 LightColor;
+}PS_CONST_BUFFER,*PPS_CONST_BUFFER;
+
 ID3D11Device* gDXDevice = NULL;
 ID3D11DeviceContext* gDXDeviceContext = NULL;
 IDXGISwapChain* gDXSwapChain = NULL;
@@ -22,9 +27,16 @@ ID3D11PixelShader* gPixelShader = NULL;
 ID3D11InputLayout* gInputLayout= NULL;
 ID3D11Buffer* gVBuffer = NULL;
 ID3D11Buffer* gVertexConstBuffer = NULL;
+ID3D11Buffer* gPScbFrameBuffer = NULL;
 VS_CONST_BUFFER gVSConstBuffer;
+PS_CONST_BUFFER gPSConstBuffer;
+ID3D11ShaderResourceView* gTextureArr[2] = { NULL, };
+ID3D11SamplerState* gTextureSamplerStateArr[2] = { NULL, };
+
+
 CMyDXCam gCamera;
 C3DObject g3DObject;
+
 float rot = 0.f;
 const D3D11_INPUT_ELEMENT_DESC ied[] =
 {
@@ -35,6 +47,16 @@ const D3D11_INPUT_ELEMENT_DESC ied[] =
 
 void DX3DCleanup()
 {
+	/*if (gDiffuseTexture)
+	{
+		gDiffuseTexture->Release();
+		gDiffuseTexture = NULL;
+	}
+	if (gDiffuseTextureSamplerState)
+	{
+		gDiffuseTextureSamplerState->Release();
+		gDiffuseTextureSamplerState = NULL;
+	}*/
 	if (gVertexConstBuffer)
 	{
 		gVertexConstBuffer->Release();
@@ -88,6 +110,55 @@ void DX3DCleanup()
 
 }
 
+HRESULT LoadTexture(
+	const WCHAR* strTextureFilePath,
+	ID3D11ShaderResourceView** textureResourceView,
+	ID3D11SamplerState** TextureSamplerState)
+{
+	DirectX::ScratchImage image;
+
+	HRESULT hr = 0;
+	hr = CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
+	if (FAILED(hr))
+	{
+		goto EXIT;
+	}
+
+	hr = LoadFromWICFile(strTextureFilePath, DirectX::WIC_FLAGS_NONE, nullptr, image);
+
+	if (FAILED(hr))
+	{
+		goto EXIT;
+	}
+
+	hr = CreateShaderResourceView(gDXDevice, image.GetImages(), image.GetImageCount(), image.GetMetadata(), &(*textureResourceView));
+
+	if (FAILED(hr))
+	{
+		if ((*textureResourceView))
+		{
+			(*textureResourceView)->Release();
+			(*textureResourceView) = NULL;
+		}
+		goto EXIT;
+	}
+
+
+	D3D11_SAMPLER_DESC sampDesc;
+	ZeroMemory(&sampDesc, sizeof(sampDesc));
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampDesc.MinLOD = 0;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	hr = gDXDevice->CreateSamplerState(&sampDesc, &(*TextureSamplerState));
+
+EXIT:
+
+	return hr;
+}
 BOOL LoadModel(const WCHAR* objFile)
 {
 	DWORD dwVertexSize = 0;
@@ -273,8 +344,23 @@ HRESULT InitializeDX3D(HWND hwnd, UINT width,UINT height, const WCHAR* obj,const
 	if (!LoadModel(obj))
 	{
 		hResult = E_FAIL;
+		OutputDebugString(L"LoadModel error\n");
 		goto ERROR_EXIT;
 	}
+	hResult = LoadTexture(L"Fieldstone.png",&(gTextureArr[0]),&gTextureSamplerStateArr[0]);
+	if (FAILED(hResult))
+	{
+		OutputDebugString(L"LoadTexture error\n");
+		goto ERROR_EXIT;
+	}
+
+	hResult = LoadTexture(L"fieldstone_SM.png", &(gTextureArr[1]), &gTextureSamplerStateArr[1]);
+	if (FAILED(hResult))
+	{
+		OutputDebugString(L"LoadTexture error\n");
+		goto ERROR_EXIT;
+	}
+
 	D3D11_BUFFER_DESC cbbd;
 	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
 
@@ -284,6 +370,14 @@ HRESULT InitializeDX3D(HWND hwnd, UINT width,UINT height, const WCHAR* obj,const
 	cbbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	cbbd.MiscFlags = 0;
 	gDXDevice->CreateBuffer(&cbbd, NULL, &gVertexConstBuffer);
+
+	ZeroMemory(&cbbd, sizeof(D3D11_BUFFER_DESC));
+	cbbd.Usage = D3D11_USAGE_DYNAMIC;
+	cbbd.ByteWidth = sizeof(PS_CONST_BUFFER);
+	cbbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbbd.MiscFlags = 0;
+	gDXDevice->CreateBuffer(&cbbd, NULL, &gPScbFrameBuffer);
 
 	
 	gCamera.CameraInitialize(width, height, 
@@ -319,6 +413,9 @@ void Render()
 	UINT offset = 0;
 	gDXDeviceContext->VSSetShader(gVertexShader, 0, 0);
 	gDXDeviceContext->PSSetShader(gPixelShader, 0, 0);
+	gDXDeviceContext->PSSetShaderResources(0, 2, gTextureArr);
+	gDXDeviceContext->PSSetSamplers(0, 2, gTextureSamplerStateArr);
+
 	gDXDeviceContext->IASetInputLayout(gInputLayout);
 
 	gDXDeviceContext->IASetVertexBuffers(0, 1, &gVBuffer, &stride, &offset);
@@ -336,6 +433,15 @@ void Render()
 	memcpy(ms.pData, &gVSConstBuffer, sizeof(gVSConstBuffer));                 // copy the data
 	gDXDeviceContext->Unmap(gVertexConstBuffer, NULL);                                      // unmap the buffer
 	gDXDeviceContext->VSSetConstantBuffers(0, 1, &gVertexConstBuffer);
+
+	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	XMStoreFloat4(&gPSConstBuffer.LightColor, XMVectorSet(0.7f, 0.7f, 1.0f, 1.0f));
+	gDXDeviceContext->Map(gPScbFrameBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
+	memcpy(ms.pData, &gPSConstBuffer, sizeof(gPSConstBuffer));                 // copy the data
+	gDXDeviceContext->Unmap(gPScbFrameBuffer, NULL);                                      // unmap the buffer
+	gDXDeviceContext->PSSetConstantBuffers(0, 1, &gPScbFrameBuffer);
+
+
 
 	gDXDeviceContext->Draw(g3DObject.m_VertexListSize, 0);
 
