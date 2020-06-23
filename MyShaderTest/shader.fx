@@ -64,31 +64,19 @@ VS_OUTPUT vs_main(VS_INPUT Input )
 
 	Output.mTexCoord = Input.mTexCoord;
 	Output.mDiffuse = dot(-lightDir, worldNormal); //난반사 
-	Output.mReflection = reflect(lightDir, worldNormal); //반사벡터 구하기
+	
 	return Output;
 	
 }
 
 float4 ps_main(PS_INPUT Input) : SV_TARGET
 {
-	float4 albedo = ObjTexture[0].Sample(ObjSamplerState[0], Input.mTexCoord);
-	float3 diffuse = LightColor.rgb* albedo.rgb* saturate(Input.mDiffuse);
+	
+	float3 diffuse = saturate(Input.mDiffuse);
 
-   float3 reflection = normalize(Input.mReflection); // 반사광 벡터 노말라이즈
-   float3 viewDir = normalize(Input.mViewDir); // 카메라 벡터 노멀라이즈 
-   float3 specular = 0; //반사광양 구하기
-   if (diffuse.x > 0)
-   {
-	  specular = saturate(dot(reflection, -viewDir));
-	  specular = pow(specular, 20.0f); //거듭제곱
-	  float4 specularIntensity = ObjTexture[1].Sample(ObjSamplerState[1], Input.mTexCoord);
+	diffuse = ceil(diffuse * 5) / 5.0f;
+  
 
-	  specular *= specularIntensity.rgb* LightColor.rgb;
-   }
-
-
-   float3 ambient = float3(0.1f, 0.1f, 0.1f)* albedo; //주변광
-
-   return float4(ambient + diffuse + specular, 1); //출력 
+   return float4(diffuse.xyz* LightColor.xyz, 1); //출력 
    
 }
