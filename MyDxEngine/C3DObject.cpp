@@ -23,6 +23,11 @@ void C3DObject::CleanUp()
 		
 	}
 	m_VertexListSize = 0;
+	if (m_pindexList)
+	{
+		delete[] m_pindexList;
+	}
+	m_indexSize = 0;
 }
 
 int C3DObject::LoadObjFile(LPCWSTR pszObjFilePath)
@@ -43,8 +48,11 @@ int C3DObject::LoadObjFile(LPCWSTR pszObjFilePath)
 	vector<TInput> tinput;
 	vector<NInput> ninput;
 	vector<FInput> finput;
+	map<CString, VERTEX> vertexMap;
+	map<CString, UINT> vertexIdxMap;
 	filelen.QuadPart = 0;
 	int i = 0;
+	int j = 0;
 	if (!PathFileExists(pszObjFilePath))
 	{
 		nRet = -1;
@@ -197,22 +205,51 @@ int C3DObject::LoadObjFile(LPCWSTR pszObjFilePath)
 
 		filePos++;
 	}
+	
 
-
-
-	m_pVERTEXList = new VERTEX[finput.size()];
-	 i = 0;
 
 	for (auto iter = finput.begin(); iter != finput.end(); iter++)
 	{
-		m_pVERTEXList[i++] = VERTEX(
+		CString str;
+		str.Format(_T("%d/%d/%d"), (iter->v) - 1, (iter->t) - 1, (iter->n) - 1);
+		
+		vertexMap[str] = VERTEX(
 			vinput[(iter->v) - 1].x, vinput[(iter->v) - 1].y, vinput[(iter->v) - 1].z,
 			tinput[(iter->t) - 1].u, tinput[(iter->t) - 1].v,
-			ninput[(iter->n)-1].x, ninput[(iter->n) - 1].y, ninput[(iter->n) - 1].z);
+			ninput[(iter->n) - 1].x, ninput[(iter->n) - 1].y, ninput[(iter->n) - 1].z);
 
 	}
-	m_VertexListSize = i;
+	m_VertexListSize= vertexMap.size();
+	
+	m_pVERTEXList = new VERTEX[m_VertexListSize];
+	i = 0;
+	for (auto iter = vertexMap.begin(); iter != vertexMap.end(); iter++)
+	{
+		
+		m_pVERTEXList[i++] = iter->second;
+		CString str;
+		str.Format(_T("%d,%d,%d,%d,%d,%d"), iter->second.X, iter->second.Y, iter->second.Z, iter->second.normal.x, iter->second.normal.y, iter->second.normal.z);
+		vertexIdxMap[str] = i-1;
+		
+	}
 
+	m_indexSize = finput.size();
+	m_pindexList = new unsigned int[m_indexSize];
+
+	for (auto iter = finput.begin(); iter != finput.end(); iter++)
+	{
+		VERTEX vtx = VERTEX(
+			vinput[(iter->v) - 1].x, vinput[(iter->v) - 1].y, vinput[(iter->v) - 1].z,
+			tinput[(iter->t) - 1].u, tinput[(iter->t) - 1].v,
+			ninput[(iter->n) - 1].x, ninput[(iter->n) - 1].y, ninput[(iter->n) - 1].z);
+		int idx = 0;
+		CString str;
+		str.Format(_T("%d,%d,%d,%d,%d,%d"), vtx.X, vtx.Y, vtx.Z, vtx.normal.x, vtx.normal.y, vtx.normal.z);
+
+		m_pindexList[j++] = vertexIdxMap[str];
+
+	
+	}
 
 	nRet = 0;
 EXIT:

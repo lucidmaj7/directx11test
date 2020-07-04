@@ -39,7 +39,7 @@ void CMyDXModel::Render(CMyDXCam* myCam, Light light)
 	m_pDxDevCtx->IASetInputLayout(m_pLayout);
 
 	m_pDxDevCtx->IASetVertexBuffers(0, 1, &m_pVBuffer, &stride, &offset);
-//	m_pDxDevCtx->IASetIndexBuffer(m_pIdxBuffer, DXGI_FORMAT_R32_UINT, 0);
+	m_pDxDevCtx->IASetIndexBuffer(m_pIdxBuffer, DXGI_FORMAT_R32_UINT, 0);
 	m_pDxDevCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	m_constbuffPerFrame.light = light;
@@ -61,7 +61,7 @@ void CMyDXModel::Render(CMyDXCam* myCam, Light light)
 	m_pDxDevCtx->Unmap(m_pCBPerBuffer, NULL);                                      // unmap the buffer
 	m_pDxDevCtx->VSSetConstantBuffers(0, 1, &m_pCBPerBuffer);
 
-	m_pDxDevCtx->Draw(m_vertexListSize, 0);
+	//m_pDxDevCtx->Draw(m_vertexListSize, 0);
 
 	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	m_pDxDevCtx->Map(m_cbPerFrameBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
@@ -70,7 +70,7 @@ void CMyDXModel::Render(CMyDXCam* myCam, Light light)
 	m_pDxDevCtx->PSSetConstantBuffers(0, 1, &m_cbPerFrameBuffer);
 	
 
-	//m_pDxDevCtx->DrawIndexed(m_dwIndexListSize, 0, 0);
+	m_pDxDevCtx->DrawIndexed(m_dwIndexListSize, 0, 0);
 }
 
 HRESULT CMyDXModel::LoadTexture(const WCHAR* strTextureFilePath)
@@ -241,7 +241,8 @@ BOOL CMyDXModel::InitalizeModel(
 	}
 	m_vertexListSize = m_Object.m_VertexListSize;
 	m_pVertexList = m_Object.m_pVERTEXList;
-
+	m_dwIndexList = m_Object.m_pindexList;
+	m_dwIndexListSize = m_Object.m_indexSize;
 	ZeroMemory(&bd, sizeof(bd));
 
 	bd.Usage = D3D11_USAGE_DYNAMIC;                // write access access by CPU and GPU
@@ -256,7 +257,7 @@ BOOL CMyDXModel::InitalizeModel(
 		goto EXIT;
 	}
 
-	/*D3D11_BUFFER_DESC idxBufDesc;
+	D3D11_BUFFER_DESC idxBufDesc;
 	ZeroMemory(&idxBufDesc, sizeof(idxBufDesc));
 	idxBufDesc.Usage = D3D11_USAGE_DYNAMIC;
 	idxBufDesc.ByteWidth = sizeof(UINT) * m_dwIndexListSize;
@@ -269,7 +270,7 @@ BOOL CMyDXModel::InitalizeModel(
 		bSuccess = FALSE;
 		goto EXIT;
 	}
-	*/
+	
 	
 	if (LoadShader(pszShaderFile) == FALSE)
 	{
@@ -309,13 +310,13 @@ BOOL CMyDXModel::InitalizeModel(
 	m_pDxDevCtx->Map(m_pVBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
 	memcpy(ms.pData, m_pVertexList, sizeof(VERTEX) * m_vertexListSize);                 // copy the data
 	m_pDxDevCtx->Unmap(m_pVBuffer, NULL);                                      // unmap the buffer
-	/*
+	
 	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	m_pDxDevCtx->Map(m_pIdxBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
 	memcpy(ms.pData, m_dwIndexList, sizeof(DWORD) * m_dwIndexListSize);                 // copy the data
 	m_pDxDevCtx->Unmap(m_pIdxBuffer, NULL);
 
-	*/
+	
 
 	
 

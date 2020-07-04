@@ -2,11 +2,13 @@
 //
 
 #include <iostream>
-#include "../MyDXEngineTest/C3DObject.h"
+#include "C3DObject.h"
 int main()
 {
     std::cout << "Hello World!\n";
     C3DObject obj;
     obj.LoadObjFile(L"my.obj");
+    
+    std::cout << "vertex count : "<< obj.m_VertexListSize << " index size: "<< obj.m_indexSize<<endl;
     return 0;
 }
