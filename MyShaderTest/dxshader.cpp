@@ -26,6 +26,7 @@ ID3D11VertexShader* gVertexShader = NULL;    // the vertex shader
 ID3D11PixelShader* gPixelShader = NULL;
 ID3D11InputLayout* gInputLayout= NULL;
 ID3D11Buffer* gVBuffer = NULL;
+ID3D11Buffer* gIdxBuffer = NULL;
 ID3D11Buffer* gVertexConstBuffer = NULL;
 ID3D11Buffer* gPScbFrameBuffer = NULL;
 VS_CONST_BUFFER gVSConstBuffer;
@@ -185,6 +186,25 @@ BOOL LoadModel(const WCHAR* objFile)
 	gDXDeviceContext->Map(gVBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
 	memcpy(ms.pData, g3DObject.m_pVERTEXList, sizeof(VERTEX) * g3DObject.m_VertexListSize);                 // copy the data
 	gDXDeviceContext->Unmap(gVBuffer, NULL);
+
+
+	D3D11_BUFFER_DESC idxBufDesc;
+	ZeroMemory(&idxBufDesc, sizeof(idxBufDesc));
+	idxBufDesc.Usage = D3D11_USAGE_DYNAMIC;
+	idxBufDesc.ByteWidth = sizeof(UINT) * g3DObject.m_indexSize;
+	idxBufDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	idxBufDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;    // allow CPU to write in buffer
+
+	if (FAILED(gDXDevice->CreateBuffer(&idxBufDesc, NULL, &gIdxBuffer)))
+	{
+		OutputDebugString(L"Index Buffer error\n");
+	
+		return FALSE;
+	}
+	ZeroMemory(&ms, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	gDXDeviceContext->Map(gIdxBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);    // map the buffer
+	memcpy(ms.pData, g3DObject.m_pindexList, sizeof(UINT) * g3DObject.m_indexSize);                 // copy the data
+	gDXDeviceContext->Unmap(gIdxBuffer, NULL);
 
 	return TRUE;
 }
@@ -420,6 +440,8 @@ void Render()
 
 	gDXDeviceContext->IASetVertexBuffers(0, 1, &gVBuffer, &stride, &offset);
 	gDXDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	gDXDeviceContext->IASetIndexBuffer(gIdxBuffer, DXGI_FORMAT_R32_UINT, 0);
+	
 
 	gVSConstBuffer.projectionMatrix = XMMatrixTranspose(gCamera.GetProjectionMatrix());// XMMatrixIdentity();
 	gVSConstBuffer.viewMatrix = XMMatrixTranspose(gCamera.GetCameraMetrix());
@@ -443,7 +465,8 @@ void Render()
 
 
 
-	gDXDeviceContext->Draw(g3DObject.m_VertexListSize, 0);
+	gDXDeviceContext->DrawIndexed(g3DObject.m_indexSize, 0, 0);
+	//gDXDeviceContext->Draw(g3DObject.m_VertexListSize, 0);
 
 }
 void BeginScene()
