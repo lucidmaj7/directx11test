@@ -64,7 +64,7 @@ public:
 	void CleanUp();
 	PVERTEX m_pVERTEXList;
 	DWORD m_VertexListSize;
-	unsigned int* m_pindexList;
+	UINT* m_pindexList;
 	DWORD m_indexSize;
 
 
