@@ -228,13 +228,13 @@ int C3DObject::LoadObjFile(LPCWSTR pszObjFilePath)
 		
 		m_pVERTEXList[i++] = iter->second;
 		CString str;
-		str.Format(_T("%d,%d,%d,%d,%d,%d"), iter->second.X, iter->second.Y, iter->second.Z, iter->second.normal.x, iter->second.normal.y, iter->second.normal.z);
+		str.Format(_T("%f,%f,%f,%f,%f,%f,%f,%f"), iter->second.X, iter->second.Y, iter->second.Z,iter->second.texCoord.x, iter->second.texCoord.y, iter->second.normal.x, iter->second.normal.y, iter->second.normal.z);
 		vertexIdxMap[str] = i-1;
 		
 	}
 
 	m_indexSize = finput.size();
-	m_pindexList = new unsigned int[m_indexSize];
+	m_pindexList = new UINT[m_indexSize];
 
 	for (auto iter = finput.begin(); iter != finput.end(); iter++)
 	{
@@ -244,7 +244,7 @@ int C3DObject::LoadObjFile(LPCWSTR pszObjFilePath)
 			ninput[(iter->n) - 1].x, ninput[(iter->n) - 1].y, ninput[(iter->n) - 1].z);
 		int idx = 0;
 		CString str;
-		str.Format(_T("%d,%d,%d,%d,%d,%d"), vtx.X, vtx.Y, vtx.Z, vtx.normal.x, vtx.normal.y, vtx.normal.z);
+		str.Format(_T("%f,%f,%f,%f,%f,%f,%f,%f"), vtx.X, vtx.Y, vtx.Z,vtx.texCoord.x,vtx.texCoord.y ,vtx.normal.x, vtx.normal.y, vtx.normal.z);
 
 		m_pindexList[j++] = vertexIdxMap[str];
 
