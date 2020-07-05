@@ -140,6 +140,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     {
         gDXEngine.AddModel(pStaue1);
     }
+    
     ///////////////
 
     while (true)
@@ -280,6 +281,7 @@ void UpdateModel()
     Rotation = XMMatrixRotationAxis(rotaxis, -rot);
     Translation = XMMatrixTranslation(-50.0f, 0.f, -50.0f);
     pStaue1->setTransformMatrix(Rotation * Translation);
+    
 }
 
 //
